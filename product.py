@@ -9,3 +9,6 @@ class Product:
     def set_secondary(self, prod_a, prod_b):
         self.secondary_a = prod_a
         self.secondary_b = prod_b
+
+    def __str__(self):
+        return "P"+str(self.number)

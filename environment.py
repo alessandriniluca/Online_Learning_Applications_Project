@@ -39,12 +39,17 @@ class Environment:
     def round(self, budget):
         # sample the total number of users for the problem
         n_users = np.random.normal(self.average_users_number, self.std_users)
-        actual_alpha = np.random.dirichlet(self.basic_alphas + self.alphas_functions(budget))
-        users_per_category = (n_users * actual_alpha).astype(int)
+        res = self.basic_alphas + self.alphas_functions(budget)
+        actual_alpha = np.array([])
+        for i in range(len(res)):
+            actual_alpha = np.concatenate((actual_alpha, np.random.dirichlet(res[i])), axis=0)                
+        actual_alpha = actual_alpha.reshape(3, 6)
+
+        # users_per_category = (n_users * actual_alpha).astype(int)
+        users_per_category = (actual_alpha*n_users[:, np.newaxis]).astype(int)
 
         # discard alpha_0, user that visit competitor's website 
-        users_per_category = (users_per_category[:len(users_per_category)-1]).reshape(3, 5)
-
+        users_per_category = (users_per_category[:, :5]) #.reshape(3, 5)
         this_round_users = []
 
         for i in range(len(users_per_category)):
@@ -55,7 +60,8 @@ class Environment:
                         self.reservation_price_means[i],
                         self.reservation_price_std_dev[i],
                         self.quantity_means[i],
-                        self.quantity_std_dev[i]
+                        self.quantity_std_dev[i],
+                        user_class=i
                     )
 
                     this_round_users.append(user)
