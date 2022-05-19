@@ -1,4 +1,4 @@
-from user import User
+from environment.user import User
 import numpy as np
 
 class Environment:

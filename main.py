@@ -1,7 +1,6 @@
 import numpy as np
-from product import Product
-from environment import Environment
-
+from environment.product import Product
+from environment.environment import Environment
 
 # TO DO: write correct different alpha functions
 alphas = np.array([[1, 2, 4, 5, 7, 15], [1, 2, 4, 9, 6, 16], [7, 5, 3, 2, 1, 15]])

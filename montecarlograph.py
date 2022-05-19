@@ -1,7 +1,7 @@
 import numpy as np
 
 from graph import Graph
-from product import Product
+from environment.product import Product
 
 graph_clicks=np.array([[.3, .2, .3, .5, .45], [.4, .3, .5, .6, .1], [.1, .1, .1, .2, .3], [.4, .2, .3, .3, .2], [.1, .2, .6, .8, .2]])
 p1 = Product(name="P0", price=10, number=0)
