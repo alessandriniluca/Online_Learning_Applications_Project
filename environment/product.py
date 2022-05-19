@@ -12,3 +12,9 @@ class Product:
 
     def __str__(self):
         return "P"+str(self.number)
+
+    def get_secondaries(self):
+        return self.secondary_a, self.secondary_b
+    
+    def __eq__(x1, x2):
+        return x1.name == x2.name
