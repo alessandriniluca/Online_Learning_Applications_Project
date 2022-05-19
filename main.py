@@ -1,6 +1,7 @@
 import numpy as np
 from environment.product import Product
 from environment.environment import Environment
+from optimizer.optimizer import Optimizer
 
 # TO DO: write correct different alpha functions
 alphas = np.array([[1, 2, 4, 5, 7, 15], [1, 2, 4, 9, 6, 16], [7, 5, 3, 2, 1, 15]])
@@ -41,3 +42,26 @@ env = Environment(
 )
 
 env.round(budget=[50, 10, 20, 10, 10])
+
+np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
+
+# TEST FOR OPTIMIZER
+users_number=[100, 130, 110]
+alphas = np.array([[1, 2, 4, 5, 7, 15], [1, 2, 4, 9, 6, 16], [7, 5, 3, 2, 1, 15]])
+
+def alphas_function_new(budget):
+    increment = []
+    for i in range(5):
+        increment.append( (3.0 * (1.0 - np.exp(-.1*(budget[i])))).astype(int) )
+    return np.array(increment)
+
+alphas_functions = [alphas_function_new, alphas_function_new, alphas_function_new]
+
+buy_probs = test
+prices = [10, 15, 20, 5, 7]
+
+total_budget = 100
+resolution = 10
+
+optimizer = Optimizer(users_number, alphas, alphas_functions, buy_probs, prices, total_budget, resolution)
+print(optimizer.get_revenues_for_campaign(0))
