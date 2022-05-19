@@ -16,5 +16,5 @@ class Product:
     def get_secondaries(self):
         return self.secondary_a, self.secondary_b
     
-    def __eq__(x1, x2):
-        return x1.name == x2.name
+    def __eq__(self, other):
+        return self.name == other.name
