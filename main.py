@@ -64,4 +64,6 @@ total_budget = 100
 resolution = 10
 
 optimizer = Optimizer(users_number, alphas, alphas_functions, buy_probs, prices, total_budget, resolution)
-print(optimizer.get_revenues_for_campaign(0))
+# print(optimizer.get_revenues_for_campaign(0))
+
+optimizer.func()

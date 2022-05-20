@@ -1,6 +1,6 @@
 from pydoc import doc
 import numpy as np
-from environment.product import Product
+# from environment.product import Product
 from statistics import NormalDist
 
 class Optimizer:
@@ -15,6 +15,7 @@ class Optimizer:
         self.prices = prices
         self.total_budget = total_budget
         self.resolution = resolution
+        assert total_budget%resolution==0, "il budget e la risoluzione non sono divisibili" # TODO
 
     def get_revenue(self, product_index, single_budget):
         total_revenue = 0
@@ -37,7 +38,15 @@ class Optimizer:
             revenues.append(self.get_revenue(product_index,budget))
         return revenues
 
-
-
-
-
+    # per ogni cella della campagna devo prendere il 
+    # max{(c_i+c_i-1), ...} di tutti i budget dall'inizio a quella cella
+    # 
+    def func(self):
+        table = np.zeros((5+1, int(self.total_budget/self.resolution)))
+        for i in range(1,6):
+            for j in range(int(self.total_budget/self.resolution)):
+                revenues_current_campain = self.get_revenues_for_campaign(i-1)
+                print(revenues_current_campain)
+                print()
+                table[i][j] = max((revenues_current_campain[k]+table[i-1][j-k]) for k in range(j+1))
+                # print(table)
