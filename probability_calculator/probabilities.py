@@ -21,6 +21,16 @@ class Probabilities:
         self.reservation_price_means = reservation_price_means
     
     def prob_buy_starting_from(self, starting_prod:Product, prod:Product, user_class: int) -> float :
+        """Computing the probability of buying product prod given that our navigation started from product starting_prod, according to the specified user class
+
+        Args:
+            starting_prod (Product): product from which our navigation starts
+            prod (Product): product of which we want to compute the probability of buying, starting the navigation from starting_prod
+            user_class (int): class of the user considered. In the standard version of the problem they are three
+
+        Returns:
+            float: probability of buying prod given that the navigation of the user of class user_class started with starting_prod
+        """
         buying_prob = 0
         queue = []
         buy_first_prob = 1 - (NormalDist(mu=self.reservation_price_means[user_class][starting_prod.number], sigma=self.reservation_price_std_dev[user_class][starting_prod.number]).cdf(starting_prod.price))
@@ -41,12 +51,29 @@ class Probabilities:
         return buying_prob
     
     def buy_prob_calculator(self, user_class:int, parent_prod:Product, child_prod:Product, parent_buying_prob:float, lamb:float)->float:
+        """Computing the probability of buying one of the two child products (child_prod) given the probability of buyng its parent (parent_buying_prob), according to the class of the user
+
+        Args:
+            user_class (int): class of the user
+            parent_prod (Product): main product in the page
+            child_prod (Product): one of the two child products of the page
+            parent_buying_prob (float): probability of buying the parent
+            lamb (float): probability to see the child_prod (in the standard version of the assignment is 1 for the first secondary products, and 0.8 for the second secondary product)
+
+        Returns:
+            float: probability of buying the secondary product child_progt given the probability of buying parent_prod, specified as parent_buying_prod (according to the specific user class)
+        """
         buy_prob = 1 - (NormalDist(mu=self.reservation_price_means[user_class][child_prod.number], sigma=self.reservation_price_std_dev[user_class][child_prod.number]).cdf(child_prod.price))
         click_prob = self.graph_clicks[parent_prod.number][child_prod.number]
         prob = parent_buying_prob*lamb*click_prob*buy_prob
         return prob
     
     def get_buy_probs(self)->float:
+        """This function comptues the probability of buying every product starting from every product, according to the class of the user. The starting product is the product with which the navigation starts
+
+        Returns:
+            float: is a matrix of floats (probabilities), with indexes: [class of the user][starting product][buying product]
+        """
         matrix = np.zeros((self.reservation_price_means.shape[0], len(self.products), len(self.products)))
         for user_class in range(self.reservation_price_means.shape[0]):
             for starting_prod in range(len(self.products)):
