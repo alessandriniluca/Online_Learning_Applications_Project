@@ -2,6 +2,7 @@ import numpy as np
 from environment.product import Product
 from environment.environment import Environment
 from probability_calculator.probabilities import Probabilities
+from statistics import NormalDist
 
 # TO DO: write correct different alpha functions
 alphas = np.array([[1, 2, 4, 5, 7, 15], [1, 2, 4, 9, 6, 16], [7, 5, 3, 2, 1, 15]])
@@ -48,3 +49,25 @@ np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 calculator = Probabilities(env.graph_clicks, products, env.lambda_prob, env.reservation_price_means, env.reservation_price_std_dev)
 test = calculator.get_buy_probs()
 print(test)
+print("p1 buy =")
+p1_buy = 1-NormalDist(mu=9, sigma=2).cdf(10)
+print(p1_buy)
+p2_buy = 1-NormalDist(mu=14, sigma=3).cdf(15)
+print("p2 buy = ")
+print(p2_buy)
+p3_buy = 1-NormalDist(mu=21, sigma=2).cdf(20)
+print("p3 buy =")
+print(p3_buy)
+g_12 = env.graph_clicks[0][1]
+print("graph_clicks p1->p2")
+print(g_12)
+g_23 = env.graph_clicks[1][2]
+print("graph_clicks p2->p3")
+print(g_23)
+g_13 = env.graph_clicks[0][2]
+print("graph_clicks p1->p3")
+print(g_13)
+
+print("If the following result is zero, then they are equal")
+checksum = p1_buy*1*g_12*p2_buy*1*g_23*p3_buy + p1_buy*0.8*g_13*p3_buy-test[1][0][2]
+print(checksum)
