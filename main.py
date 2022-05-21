@@ -94,7 +94,7 @@ click_2_3 = env.graph_clicks[1][2]
 first_term = p4buy * 0.8 * click_4_3 * p3_buy
 second_term = p4buy * 1 * click_4_1 * p1_buy * 0.8 * click_1_3 * p3_buy
 third_term = p4buy * 1 * click_4_1 * p1_buy * 1 * click_1_2 * p2_buy * 1 * click_2_3 * p3_buy
-prob_computed_algorithm = test[1][2][3]
+prob_computed_algorithm = test[1][3][2]
 prob_computed_manually = first_term + second_term + third_term
 checksum = prob_computed_manually - prob_computed_algorithm
 
