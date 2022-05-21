@@ -24,9 +24,9 @@ class Probabilities:
         buying_prob = 0
         queue = []
         buy_first_prob = 1 - (NormalDist(mu=self.reservation_price_means[user_class][starting_prod.number], sigma=self.reservation_price_std_dev[user_class][starting_prod.number]).cdf(starting_prod.price))
-        queue.append([1, buy_first_prob, [], starting_prod])
+        queue.append([buy_first_prob, [], starting_prod])
         while queue:
-            lamb, parent_buying_prob, viewed, current_prod = queue.pop()
+            parent_buying_prob, viewed, current_prod = queue.pop()
             if current_prod in viewed:
                 continue
             if current_prod == prod:
@@ -34,10 +34,10 @@ class Probabilities:
                 continue
             viewed.append(current_prod)
             first_secondary, second_secondary = current_prod.get_secondaries()
-            prob_buy_first = self.buy_prob_calculator(user_class, current_prod, first_secondary, parent_buying_prob, lamb)
-            prob_buy_sec = self.buy_prob_calculator(user_class, current_prod, second_secondary, parent_buying_prob, lamb)
-            queue.append([1, prob_buy_first, viewed.copy(), first_secondary])
-            queue.append([self.lambda_prob, prob_buy_sec,viewed.copy(), second_secondary])
+            prob_buy_first = self.buy_prob_calculator(user_class, current_prod, first_secondary, parent_buying_prob, 1)
+            prob_buy_sec = self.buy_prob_calculator(user_class, current_prod, second_secondary, parent_buying_prob, self.lambda_prob)
+            queue.append([prob_buy_first, viewed.copy(), first_secondary])
+            queue.append([prob_buy_sec, viewed.copy(), second_secondary])
         return buying_prob
     
     def buy_prob_calculator(self, user_class:int, parent_prod:Product, child_prod:Product, parent_buying_prob:float, lamb:float)->float:

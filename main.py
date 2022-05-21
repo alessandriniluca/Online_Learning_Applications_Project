@@ -71,7 +71,36 @@ print(g_13)
 print("If the following result is zero, then they are equal")
 checksum = p1_buy*1*g_12*p2_buy*1*g_23*p3_buy + p1_buy*0.8*g_13*p3_buy-test[0][0][2]
 print(checksum)
-print("correct result")
+print("algorithm")
 print(test[0][0][2])
-print("obtained")
+print("obtained manually")
 print(p1_buy*1*g_12*p2_buy*1*g_23*p3_buy + p1_buy*0.8*g_13*p3_buy)
+
+print("second test, class 2")
+# p4buy*0.8*p3_click*p3_buy +
+# p4buy * 1 * p1_click * p1_buy * 0.8 *p3_click * p3_buy
+# p4buy * 1 * p1_click * p1_buy * 1 * p2_ click * p2_buy * 1 * p3_click * p3_buy
+p4buy = 1-NormalDist(mu=9, sigma=1).cdf(5)
+p3buy = 1-NormalDist(mu=22, sigma=2).cdf(20)
+p2buy = 1-NormalDist(mu=15, sigma=1).cdf(15)
+p1buy = 1-NormalDist(mu=10, sigma=2).cdf(10)
+
+click_4_3 = env.graph_clicks[3][2]
+click_4_1 = env.graph_clicks[3][0]
+click_1_3 = env.graph_clicks[0][2]
+click_1_2 = env.graph_clicks[0][1]
+click_2_3 = env.graph_clicks[1][2]
+
+first_term = p4buy * 0.8 * click_4_3 * p3_buy
+second_term = p4buy * 1 * click_4_1 * p1_buy * 0.8 * click_1_3 * p3_buy
+third_term = p4buy * 1 * click_4_1 * p1_buy * 1 * click_1_2 * p2_buy * 1 * click_2_3 * p3_buy
+prob_computed_algorithm = test[1][2][3]
+prob_computed_manually = first_term + second_term + third_term
+checksum = prob_computed_manually - prob_computed_algorithm
+
+print("checksum")
+print(checksum)
+print("algorith")
+print(prob_computed_algorithm)
+print("manually")
+print(prob_computed_manually)
