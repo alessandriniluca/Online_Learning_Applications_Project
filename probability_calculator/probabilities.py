@@ -41,7 +41,7 @@ class Probabilities:
         return buying_prob
     
     def buy_prob_calculator(self, user_class:int, parent_prod:Product, child_prod:Product, parent_buying_prob:float, lamb:float)->float:
-        buy_prob = 1 - (NormalDist(mu=self.reservation_price_means[user_class][parent_prod.number], sigma=self.reservation_price_std_dev[user_class][parent_prod.number]).cdf(parent_prod.price))
+        buy_prob = 1 - (NormalDist(mu=self.reservation_price_means[user_class][child_prod.number], sigma=self.reservation_price_std_dev[user_class][child_prod.number]).cdf(child_prod.price))
         click_prob = self.graph_clicks[parent_prod.number][child_prod.number]
         prob = parent_buying_prob*lamb*click_prob*buy_prob
         return prob

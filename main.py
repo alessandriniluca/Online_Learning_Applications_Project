@@ -69,5 +69,9 @@ print("graph_clicks p1->p3")
 print(g_13)
 
 print("If the following result is zero, then they are equal")
-checksum = p1_buy*1*g_12*p2_buy*1*g_23*p3_buy + p1_buy*0.8*g_13*p3_buy-test[1][0][2]
+checksum = p1_buy*1*g_12*p2_buy*1*g_23*p3_buy + p1_buy*0.8*g_13*p3_buy-test[0][0][2]
 print(checksum)
+print("correct result")
+print(test[0][0][2])
+print("obtained")
+print(p1_buy*1*g_12*p2_buy*1*g_23*p3_buy + p1_buy*0.8*g_13*p3_buy)
