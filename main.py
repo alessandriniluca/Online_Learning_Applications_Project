@@ -60,10 +60,12 @@ alphas_functions = [alphas_function_new, alphas_function_new, alphas_function_ne
 buy_probs = test
 prices = [10, 15, 20, 5, 7]
 
-total_budget = 100
+total_budget = 70
 resolution = 10
+min_budget = [0,0,0,0,0]
+max_budget = [50, 50, 50, 50, 50]
 
-optimizer = Optimizer(users_number, alphas, alphas_functions, buy_probs, prices, total_budget, resolution)
+optimizer = Optimizer(users_number, min_budget, max_budget, alphas, alphas_functions, buy_probs, prices, total_budget, resolution)
 # print(optimizer.get_revenues_for_campaign(0))
 
-optimizer.func()
+optimizer.optimal_budget()
