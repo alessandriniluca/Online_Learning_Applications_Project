@@ -3,6 +3,9 @@ import numpy as np
 from environment.product import Product
 from statistics import NormalDist
 
+from graph import Graph
+
+
 class Probabilities:
     def __init__(self, graph_clicks: np.ndarray, products: list, lambda_prob: float, reservation_price_means: np.ndarray, reservation_price_std_dev: np.ndarray):
         """init function of the class. N.b.: products needs to be ordered by number.
@@ -80,3 +83,21 @@ class Probabilities:
                 for buying_prod in range(len(self.products)):
                     matrix[user_class][starting_prod][buying_prod] = self.prob_buy_starting_from(self.products[starting_prod], self.products[buying_prod], user_class)
         return matrix
+
+
+    def montecarlo_get_buy_probs(self):
+        result = []
+        for user_class in range(self.reservation_price_means.shape[0]):
+            class_result = []
+            for starting_prod in range(len(self.products)):
+                g = Graph(
+                    click_probabilities=self.graph_clicks,
+                    products=self.products, 
+                    reservation_price_means=self.reservation_price_means[user_class],
+                    reservation_price_std_dev=self.reservation_price_std_dev[user_class],
+                    lambda_prob=self.lambda_prob
+                )
+                g.simulate(starting_product_number=starting_prod, spin=10000)
+                class_result.append(g.get_results().tolist())
+            result.append(class_result)
+        return np.array(result)

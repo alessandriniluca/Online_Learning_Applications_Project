@@ -1,11 +1,11 @@
 import numpy as np
 
 class Graph:
-    def __init__(self, click_probabilities=None, products=None, user_buy_price_mean=None, user_buy_price_std=None, lambda_prob=1):
+    def __init__(self, click_probabilities=None, products=None, reservation_price_means=None, reservation_price_std_dev=None, lambda_prob=1):
         self.click_probabilities = click_probabilities
         self.products = products
-        self.user_buy_price_mean = user_buy_price_mean
-        self.user_buy_price_std = user_buy_price_std
+        self.reservation_price_means = reservation_price_means
+        self.reservation_price_std_dev = reservation_price_std_dev
         self.actual_node = None
         self.activations = [0, 0, 0, 0 ,0]
         self.rounds = 0
@@ -20,8 +20,9 @@ class Graph:
     def simulate_round(self):
         self.rounds += 1
         product_number = self.actual_node.number
-        mean = self.user_buy_price_mean[product_number]
-        std = self.user_buy_price_std[product_number]
+        mean = self.reservation_price_means[product_number]
+        std = self.reservation_price_std_dev[product_number]
+        self.queue = []
         self.queue.append(self.actual_node)
         copy_click_probabilities = self.click_probabilities.copy()
 
@@ -40,7 +41,7 @@ class Graph:
                     self.queue.append(self.actual_node.secondary_b)
             self.queue = self.queue[1:]
 
-    def simulate(self, starting_product_number=1, spin=100):
+    def simulate(self, starting_product_number=1, spin=10000):
         self.set_starting(product_number=starting_product_number)
         for i in range(spin):
             self.simulate_round()
@@ -48,6 +49,7 @@ class Graph:
 
     def get_results(self):
         return np.array(self.activations)/self.rounds
+
         
     def __str__(self):
         out = ""

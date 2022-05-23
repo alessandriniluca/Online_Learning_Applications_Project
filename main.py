@@ -48,3 +48,24 @@ np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 
 calculator = Probabilities(env.graph_clicks, products, env.lambda_prob, env.reservation_price_means, env.reservation_price_std_dev)
 probabilities_matrix = calculator.get_buy_probs()
+print(probabilities_matrix)
+
+print("\n\n")
+probabilities_matrix_montacarlo = calculator.montecarlo_get_buy_probs()
+print(probabilities_matrix_montacarlo)
+
+
+
+
+# compute the error
+
+tot_1 = 0
+tot_2 = 0
+error = np.zeros((3, 5, 5))
+for i in range(3):
+    for j in range(5):
+        tot_1 += probabilities_matrix[i][j]
+        tot_2 += probabilities_matrix_montacarlo[i][j]
+        error[i][j] = probabilities_matrix[i][j] - probabilities_matrix_montacarlo[i][j]
+
+print("\n\n\n", error)
