@@ -35,6 +35,7 @@ class Probabilities:
             float: probability of buying prod given that the navigation of the user of class user_class started with starting_prod
         """
         buying_prob = 0
+        not_buying_prob = 1
         queue = []
         buy_first_prob = 1 - (NormalDist(mu=self.reservation_price_means[user_class][starting_prod.number], sigma=self.reservation_price_std_dev[user_class][starting_prod.number]).cdf(starting_prod.price))
         queue.append([buy_first_prob, [], starting_prod])
@@ -43,7 +44,8 @@ class Probabilities:
             if current_prod in viewed:
                 continue
             if current_prod == prod:
-                buying_prob += parent_buying_prob
+                buying_prob += not_buying_prob * parent_buying_prob
+                not_buying_prob *= (1 - parent_buying_prob)
                 continue
             viewed.append(current_prod)
             first_secondary, second_secondary = current_prod.get_secondaries()
