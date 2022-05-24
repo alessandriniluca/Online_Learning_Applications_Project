@@ -39,7 +39,10 @@ class Environment:
     def round(self, budget):
         # sample the total number of users for the problem
         n_users = np.random.normal(self.average_users_number, self.std_users)
-        res = self.basic_alphas + self.alphas_functions(budget)
+        delta_increment = []
+        for function in self.alphas_functions:
+            delta_increment.append(np.concatenate( (function(budget), np.array([0]) )))
+        res = self.basic_alphas + np.array(delta_increment)
         actual_alpha = np.array([])
         for i in range(len(res)):
             actual_alpha = np.concatenate((actual_alpha, np.random.dirichlet(res[i])), axis=0)                
