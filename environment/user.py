@@ -1,13 +1,14 @@
 import numpy as np
 
 class User:
-    def __init__(self, reservation_price_means, reservation_price_std_dev, quantity_means, quantity_std_dev, user_class=None):
+    def __init__(self, reservation_price_means, reservation_price_std_dev, quantity_means, quantity_std_dev, user_class=None, starting_product=1):
         self.reservation_price = np.random.normal(reservation_price_means, reservation_price_std_dev)
         self.quantity_means = quantity_means
         self.quantity_std_dev = quantity_std_dev
         self.seen_product = []
         self.bought_product = []
         self.user_class = user_class
+        self.starting_product = starting_product
 
     def has_bought(self, product):
         return self.reservation_price[product.number] < product.price

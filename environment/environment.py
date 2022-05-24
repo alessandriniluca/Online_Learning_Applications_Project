@@ -61,7 +61,8 @@ class Environment:
                         self.reservation_price_std_dev[i],
                         self.quantity_means[i],
                         self.quantity_std_dev[i],
-                        user_class=i
+                        user_class=i, 
+                        starting_product = j
                     )
 
                     this_round_users.append(user)
