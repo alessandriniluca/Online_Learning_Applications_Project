@@ -26,7 +26,10 @@ class Optimizer:
         for i, users in enumerate(self.users_number):
             budgets = np.zeros(5)
             budgets[product_index] = single_budget
-            alphas_prime = self.alphas[i][:5] + self.alphas_functions[i](budgets)
+            alphas_prime = self.alphas[i][:5] + self.alphas_functions[i](budgets) #TODO weight vs average
+            print("no normalization" + alphas_prime)
+            alphas_prime = alphas_prime/sum(alphas_prime)
+            print("with normalization" + alphas_prime)
             weighted_price = 0
             # Lo so è un po' sus
             for k in range(5):
@@ -38,7 +41,7 @@ class Optimizer:
 
     def get_revenues_for_campaign(self, product_index):
         revenues = []
-        for budget in range(0,self.total_budget, self.resolution):
+        for budget in range(0,self.total_budget+self.resolution, self.resolution):
             if(budget>=self.min_budget[product_index] and budget<=self.max_budget[product_index]):
                 revenues.append(self.get_revenue(product_index,budget))
             else:

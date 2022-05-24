@@ -57,7 +57,7 @@ def alphas_function_new(budget):
 
 alphas_functions = [alphas_function_new, alphas_function_new, alphas_function_new]
 
-buy_probs = test
+buy_probs = []
 prices = [10, 15, 20, 5, 7]
 
 total_budget = 70
