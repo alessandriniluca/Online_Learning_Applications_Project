@@ -26,10 +26,12 @@ class Optimizer:
         for i, users in enumerate(self.users_number):
             budgets = np.zeros(5)
             budgets[product_index] = single_budget
-            alphas_prime = self.alphas[i][:5] + self.alphas_functions[i](budgets) #TODO weight vs average
-            print("no normalization" + alphas_prime)
+            delta_alpha_weights = self.alphas_functions[i](budgets)
+            delta_alpha_weights = np.concatenate((delta_alpha_weights, np.array([0])))
+            alphas_prime = self.alphas[i] + delta_alpha_weights
+            # print("no normalization" + str(alphas_prime))
             alphas_prime = alphas_prime/sum(alphas_prime)
-            print("with normalization" + alphas_prime)
+            # print("with normalization" + str(alphas_prime))
             weighted_price = 0
             # Lo so è un po' sus
             for k in range(5):

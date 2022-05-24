@@ -1,8 +1,8 @@
 import numpy as np
 from environment.product import Product
 from environment.environment import Environment
-from optimizer.optimizer import Optimizer
 from probability_calculator.probabilities import Probabilities
+from statistics import NormalDist
 
 # TO DO: write correct different alpha functions
 alphas = np.array([[1, 2, 4, 5, 7, 15], [1, 2, 4, 9, 6, 16], [7, 5, 3, 2, 1, 15]])
@@ -46,28 +46,27 @@ env.round(budget=[50, 10, 20, 10, 10])
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 
-# TEST FOR OPTIMIZER
-users_number=[100, 130, 110]
-alphas = np.array([[1, 2, 4, 5, 7, 15], [1, 2, 4, 9, 6, 16], [7, 5, 3, 2, 1, 15]])
-
-def alphas_function_new(budget):
-    increment = []
-    for i in range(5):
-        increment.append( (3.0 * (1.0 - np.exp(-.1*(budget[i])))).astype(int) )
-    return np.array(increment)
-
-alphas_functions = [alphas_function_new, alphas_function_new, alphas_function_new]
-
 calculator = Probabilities(env.graph_clicks, products, env.lambda_prob, env.reservation_price_means, env.reservation_price_std_dev)
-buy_probs = calculator.get_buy_probs()
-prices = [10, 15, 20, 5, 7]
+probabilities_matrix = calculator.get_buy_probs()
+print(probabilities_matrix)
 
-total_budget = 50
-resolution = 10
-min_budget = [0,0,0,0,0]
-max_budget = [50, 50, 50, 50, 50]
+print("\n\n")
+probabilities_matrix_montacarlo = calculator.montecarlo_get_buy_probs()
+print(probabilities_matrix_montacarlo)
 
-optimizer = Optimizer(users_number, min_budget, max_budget, alphas, alphas_functions, buy_probs, prices, total_budget, resolution)
-# print(optimizer.get_revenues_for_campaign(0))
 
-optimizer.optimal_budget()
+
+
+# compute the error
+
+tot_1 = 0
+tot_2 = 0
+error = np.zeros((3, 5, 5))
+for i in range(3):
+    for j in range(5):
+        tot_1 += probabilities_matrix[i][j]
+        tot_2 += probabilities_matrix_montacarlo[i][j]
+        error[i][j] = probabilities_matrix[i][j] - probabilities_matrix_montacarlo[i][j]
+
+print("\n\n\n", error)
+print("\n\n tot:", sum(error.flatten()))
