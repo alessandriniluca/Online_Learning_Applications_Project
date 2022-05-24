@@ -86,6 +86,11 @@ class Probabilities:
 
 
     def montecarlo_get_buy_probs(self):
+        """This method compute the probabilities of buying a product starting from another, using Monte Carlo simulation
+
+        Returns:
+            float: is a matrix of floats (probabilities), with indexes: [class of the user][starting product][buying product]
+        """
         result = []
         for user_class in range(self.reservation_price_means.shape[0]):
             class_result = []

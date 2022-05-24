@@ -69,3 +69,4 @@ for i in range(3):
         error[i][j] = probabilities_matrix[i][j] - probabilities_matrix_montacarlo[i][j]
 
 print("\n\n\n", error)
+print("\n\n tot:", sum(error.flatten()))
