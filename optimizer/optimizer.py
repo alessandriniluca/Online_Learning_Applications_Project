@@ -93,8 +93,8 @@ class Optimizer:
                 # else append -inf
                 revenues.append(-np.inf)
 
-        # revn = [[-np.inf, 90, 100, 105, 110, -np.inf, -np.inf, -np.inf],[0, 82, 90, 92, -np.inf,-np.inf,-np.inf,-np.inf],[0,80,83,85,86,-np.inf,-np.inf,-np.inf],[-np.inf,90,110,115,118,120,-np.inf,-np.inf],[-np.inf,111,130,138,142,148,155,-np.inf]]
-        # return revn[product_index]
+        revn = [[-np.inf, 50, 51, 58, 61, -np.inf],[-np.inf, 29, 31, 35, 44, 48],[-np.inf, 45, 55, 58, 62, 68],[-np.inf,38, 44, 49, 58, 61],[-np.inf,42, 48, 49, 53, 59]]
+        return revn[product_index]
         return revenues
 
     def optimal_budget_matrix(self):
@@ -111,16 +111,13 @@ class Optimizer:
         for i in range(1,6):
             # Compute all revenues for a single campaign
             revenues_current_campain = self.get_revenues_for_campaign(i-1)
+            print("eee", revenues_current_campain)
             # For each budget allocation
             for j in range(int(self.total_budget/self.resolution)+1):
                 # if element not -inf
-                if(revenues_current_campain[j] != -np.inf):
-                    # choose max between all possible budget allocation with predecessors
-                    table[i][j] = max((revenues_current_campain[k]+table[i-1][j-k]) for k in range(j+1)) # - self.resolution*j
+                table[i][j] = max((revenues_current_campain[k]+table[i-1][j-k]) for k in range(j+1)) # - self.resolution*j
                     # store decision taken (index of revenues in order to reconstruct history at the end)
-                    history[i][j] = int(np.argmax(np.asarray([(revenues_current_campain[k]+table[i-1][j-k]) for k in range(j+1)])))
-                else:
-                    table[i][j] = -np.inf
+                history[i][j] = int(np.argmax(np.asarray([(revenues_current_campain[k]+table[i-1][j-k]) for k in range(j+1)])))
 
         np.set_printoptions(precision=2)
         print(np.asarray([i for i in range(0,self.total_budget+self.resolution, self.resolution)]))
@@ -146,9 +143,10 @@ class Optimizer:
         """get optimal budget allocations
         """
         table, history = self.optimal_budget_matrix()
+        
         optimal = np.zeros((5))
         # index of optimal budget picked from last line
-        j = np.argmax(table[5])
+        j = np.argmax(table[5]-np.array([i for i in range(0,self.total_budget+self.resolution, self.resolution)]))
         # index of max cell from last line
         k = int(history[5][j])
         # first unroll operation
