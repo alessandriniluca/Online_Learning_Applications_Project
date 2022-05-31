@@ -54,14 +54,33 @@ alphas = np.array([[1, 2, 4, 5, 7, 15], [1, 2, 4, 9, 6, 16], [7, 5, 3, 2, 1, 15]
 
 calculator = Probabilities(env.graph_clicks, products, env.lambda_prob, env.reservation_price_means, env.reservation_price_std_dev)
 buy_probs = calculator.get_buy_probs()
+quantities = np.array([[2, 3, 3, 3, 1], [1, 1, 1, 2, 3], [3, 4, 5, 5,5]])
 prices = [10, 15, 20, 5, 7]
 
-total_budget = 50
+total_budget = 80
 resolution = 10
 min_budget = [0,0,0,0,0]
-max_budget = [50, 50, 50, 50, 50]
+max_budget = [80, 80, 80, 80, 80]
 
-optimizer = Optimizer(users_number, min_budget, max_budget, alphas, alphas_functions, buy_probs, prices, total_budget, resolution)
+alphas_prime = np.zeros((int(total_budget/resolution)+1, len(products), 6))
+
+for single_budget in range(0, total_budget+resolution, resolution):
+    for product_index in range(len(products)):
+        for i, users in enumerate(users_number):
+            # set budget to corresponding product (using array with zeros for alpha function compatibility)
+            budgets = np.zeros(5)
+            budgets[product_index] = single_budget
+            # compute deltas of weights
+            delta_alpha_weights = alphas_functions[i](budgets)
+            # concatenate a zero in order to consider also lost visitors
+            delta_alpha_weights = np.concatenate((delta_alpha_weights, np.array([0])))
+            # compute alpha primes (expected value of dirichlet variables)
+            alphas_prime[int(single_budget/resolution)][product_index][i] = (alphas[i] + delta_alpha_weights)[product_index]/sum((alphas[i] + delta_alpha_weights))
+
+
+product_index
+optimizer = Optimizer(users_number, min_budget, max_budget, alphas, alphas_functions, buy_probs, prices, total_budget, resolution, quantities)
+optimizer.set_alpha(alphas_prime)
 # print(optimizer.get_revenues_for_campaign(0))
 
 optimizer.optimal_budget()

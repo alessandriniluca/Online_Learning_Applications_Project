@@ -7,7 +7,7 @@ from decimal import Decimal
 
 class Optimizer:
 
-    def __init__(self, users_number: list, min_budget: list, max_budget: list, alphas, alphas_functions, buy_probs, prices, total_budget, resolution):
+    def __init__(self, users_number: list, min_budget: list, max_budget: list, alphas, alphas_functions, buy_probs, prices, total_budget, resolution, quantities):
         # TODO better to have an array of functions with 3 function (one per category as alpha functions)
         # ALPHA FUNCTION HANDLER?
         """Optimizer class
@@ -32,7 +32,11 @@ class Optimizer:
         self.resolution = resolution
         self.min_budget = min_budget
         self.max_budget = max_budget
+        self.quantities = quantities
         assert total_budget%resolution==0, "il budget e la risoluzione non sono divisibili" # TODO
+
+    def set_alpha(self, alpha):
+        self.alpha_prime = alpha
 
     def get_revenue(self, product_index, single_budget):
         """Expected revenue from a budget allocation
@@ -40,7 +44,7 @@ class Optimizer:
         Args:
             product_index (_type_): product index of associated campaign
             single_budget (_type_): budget to assign to that campaign
-
+ 
         Returns:
             _type_: expected revenue
         """
@@ -48,29 +52,30 @@ class Optimizer:
         # for each user category
         for i, users in enumerate(self.users_number):
             # set budget to corresponding product (using array with zeros for alpha function compatibility)
-            budgets = np.zeros(5)
-            budgets[product_index] = single_budget
-            # compute deltas of weights
-            delta_alpha_weights = self.alphas_functions[i](budgets)
-            # concatenate a zero in order to consider also lost visitors
-            delta_alpha_weights = np.concatenate((delta_alpha_weights, np.array([0])))
-            # compute alpha primes (expected value of dirichlet variables)
-            alphas_prime = self.alphas[i] + delta_alpha_weights
-            alphas_prime = alphas_prime/sum(alphas_prime)
+            # budgets = np.zeros(5)
+            # budgets[product_index] = single_budget
+            # # compute deltas of weights
+            # delta_alpha_weights = self.alphas_functions[i](budgets)
+            # # concatenate a zero in order to consider also lost visitors
+            # delta_alpha_weights = np.concatenate((delta_alpha_weights, np.array([0])))
+            # # compute alpha primes (expected value of dirichlet variables)
+            # alphas_prime = self.alphas[i] + delta_alpha_weights
+            # alphas_prime = alphas_prime/sum(alphas_prime)
             
             # In order to compute expected revenue we have to sum
             # Users * alpha_prime * (sum of buy prob of product A given starting product B * price of A)
 
             # we first compute all the sums of price * buy prob
             weighted_price = 0
-            for k in range(5):
-                weighted_price += self.buy_probs[i][product_index][k] * self.prices[k]
+            for k in range(len(self.prices)):
+                weighted_price += self.buy_probs[i][product_index][k] * self.prices[k] * self.quantities[i][k]
 
             # Then we multiply with users and alpha_prime
-            revenue = users * alphas_prime[product_index] * weighted_price
+            revenue = users * self.alpha_prime[int(single_budget/self.resolution)][product_index][i] * weighted_price
 
             # Sum with all user categories
             total_revenue += revenue
+
         return total_revenue
 
     def get_revenues_for_campaign(self, product_index):
@@ -111,7 +116,6 @@ class Optimizer:
         for i in range(1,6):
             # Compute all revenues for a single campaign
             revenues_current_campain = self.get_revenues_for_campaign(i-1)
-            print("eee", revenues_current_campain)
             # For each budget allocation
             for j in range(int(self.total_budget/self.resolution)+1):
                 if(revenues_current_campain[j] != -np.inf):
