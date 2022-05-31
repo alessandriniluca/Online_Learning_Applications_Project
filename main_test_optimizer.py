@@ -79,7 +79,7 @@ for single_budget in range(0, total_budget+resolution, resolution):
 
 
 product_index
-optimizer = Optimizer(users_number, min_budget, max_budget, alphas, alphas_functions, buy_probs, prices, total_budget, resolution, quantities)
+optimizer = Optimizer(users_number, min_budget, max_budget, buy_probs, prices, total_budget, resolution, quantities)
 optimizer.set_alpha(alphas_prime)
 # print(optimizer.get_revenues_for_campaign(0))
 

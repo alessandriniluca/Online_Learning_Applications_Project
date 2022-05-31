@@ -7,7 +7,7 @@ from decimal import Decimal
 
 class Optimizer:
 
-    def __init__(self, users_number: list, min_budget: list, max_budget: list, alphas, alphas_functions, buy_probs, prices, total_budget, resolution, quantities):
+    def __init__(self, users_number: list, min_budget: list, max_budget: list, buy_probs, prices, total_budget, resolution, quantities):
         # TODO better to have an array of functions with 3 function (one per category as alpha functions)
         # ALPHA FUNCTION HANDLER?
         """Optimizer class
@@ -24,8 +24,6 @@ class Optimizer:
             resolution (int): minimum spendable amount
         """
         self.users_number = users_number
-        self.alphas = alphas
-        self.alphas_functions = alphas_functions
         self.buy_probs = buy_probs
         self.prices = prices
         self.total_budget = total_budget
