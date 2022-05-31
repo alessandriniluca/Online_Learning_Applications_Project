@@ -93,8 +93,8 @@ class Optimizer:
                 # else append -inf
                 revenues.append(-np.inf)
 
-        revn = [[-np.inf, 50, 51, 58, 61, -np.inf],[-np.inf, 29, 31, 35, 44, 48],[-np.inf, 45, 55, 58, 62, 68],[-np.inf,38, 44, 49, 58, 61],[-np.inf,42, 48, 49, 53, 59]]
-        return revn[product_index]
+        # revn = [[-np.inf, 50, 51, 58, 61, -np.inf],[-np.inf, 29, 31, 35, 44, 48],[-np.inf, 45, 55, 58, 62, 68],[-np.inf,38, 44, 49, 58, 61],[-np.inf,42, 48, 49, 53, 59]]
+        # return revn[product_index]
         return revenues
 
     def optimal_budget_matrix(self):
@@ -114,10 +114,13 @@ class Optimizer:
             print("eee", revenues_current_campain)
             # For each budget allocation
             for j in range(int(self.total_budget/self.resolution)+1):
-                # if element not -inf
-                table[i][j] = max((revenues_current_campain[k]+table[i-1][j-k]) for k in range(j+1)) # - self.resolution*j
+                if(revenues_current_campain[j] != -np.inf):
+                    # choose max between all possible budget allocation with predecessors
+                    table[i][j] = max((revenues_current_campain[k]+table[i-1][j-k]) for k in range(j+1)) # - self.resolution*j
                     # store decision taken (index of revenues in order to reconstruct history at the end)
-                history[i][j] = int(np.argmax(np.asarray([(revenues_current_campain[k]+table[i-1][j-k]) for k in range(j+1)])))
+                    history[i][j] = int(np.argmax(np.asarray([(revenues_current_campain[k]+table[i-1][j-k]) for k in range(j+1)])))
+                else:
+                    table[i][j] = -np.inf
 
         np.set_printoptions(precision=2)
         print(np.asarray([i for i in range(0,self.total_budget+self.resolution, self.resolution)]))
