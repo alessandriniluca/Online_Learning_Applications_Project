@@ -64,8 +64,9 @@ class Environment:
                         self.reservation_price_std_dev[i],
                         self.quantity_means[i],
                         self.quantity_std_dev[i],
-                        user_class=i, 
-                        starting_product = j
+                        user_class=i,
+                        features= [0,0] if i==0 else ([0,1] if i==1 else ([1, 1] if np.random.uniform(0,1) < 0.5 else [1,0])),
+                        starting_product=j
                     )
 
                     this_round_users.append(user)
