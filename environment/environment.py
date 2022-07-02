@@ -21,11 +21,11 @@ class Environment:
         # click graph
         self.graph_clicks = graph_clicks
 
-        self.reservation_price_means = np.array([[9, 14, 21, 8, 4], [10, 15, 22, 9, 2], [8, 12, 25, 10, 6]])
-        self.reservation_price_std_dev = np.array([[2, 3, 2, 3, 3], [2, 1, 2, 1, 2], [4, 3, 2, 3, 2]])
+        self.reservation_price_means = np.array([[81, 34, 100, 49, 25], [85, 38, 103, 55, 20], [76, 30, 95, 45, 22]])
+        self.reservation_price_std_dev = np.array([[8, 8, 8, 8, 8], [8, 8, 8, 8, 8], [8, 8, 8, 8, 8]])
 
-        self.quantity_means = np.array([[2, 3, 3, 3, 1], [1, 1, 1, 2, 3], [3, 4, 5, 5,5]])
-        self.quantity_std_dev = np.array([[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]])
+        self.quantity_means = np.array([[15, 14, 4, 10, 8], [13, 14, 5, 11, 6], [14, 12, 3, 9, 8]])
+        self.quantity_std_dev = np.array([[5, 5, 2, 6, 5], [6, 6, 2, 4, 2], [4, 5, 1, 4, 4]])
 
         self.users_per_round = []
 
@@ -39,18 +39,26 @@ class Environment:
     def round(self, budget):
         # sample the total number of users for the problem
         n_users = np.random.normal(self.average_users_number, self.std_users)
+        print("Real users:", sum(n_users))
         delta_increment = []
         for function in self.alphas_functions:
             delta_increment.append(np.concatenate( (function(budget), np.array([0]) )))
         res = self.basic_alphas + np.array(delta_increment)
         actual_alpha = np.array([])
         for i in range(len(res)):
-            actual_alpha = np.concatenate((actual_alpha, np.random.dirichlet(res[i])), axis=0)                
+            actual_alpha = np.concatenate((actual_alpha, np.random.dirichlet(20*res[i]/sum(res[i]))), axis=0)                
         actual_alpha = actual_alpha.reshape(3, 6)
 
         # users_per_category = (n_users * actual_alpha).astype(int)
+        
         users_per_category = (actual_alpha*n_users[:, np.newaxis]).astype(int)
-
+        total_number_users = sum(users_per_category)
+        print("Real users:", sum(total_number_users))
+        rr = 0
+        for r, u in zip(actual_alpha[:, 0], n_users):
+            rr += r*u
+        rr = rr / sum(n_users)
+        print("-----------Budget:", budget[0], "alpha:", rr)
         # discard alpha_0, user that visit competitor's website 
         users_per_category = (users_per_category[:, :5]) #.reshape(3, 5)
         this_round_users = []
@@ -69,6 +77,7 @@ class Environment:
                         starting_product=j
                     )
 
+
                     this_round_users.append(user)
 
                     graph_clicks = self.graph_clicks.copy()
@@ -82,7 +91,6 @@ class Environment:
                         user.add_seen_product(prod)
                         graph_clicks = self.update_graph(graph_clicks, prod)
                         # print(graph_clicks)
-
                         if user.has_bought(prod):
                             # print("\tbought product:", prod.number)
                             qta = user.quantity_bought(prod)
@@ -99,7 +107,7 @@ class Environment:
                         product_queue = product_queue[1:]
 
         self.users_per_round.append(this_round_users)
-        return this_round_users
+        return this_round_users, sum(total_number_users)
                         
 
 

@@ -69,11 +69,11 @@ class Optimizer:
                 weighted_price += self.buy_probs[i][product_index][k] * self.prices[k] * self.quantities[i][k]
 
             # Then we multiply with users and alpha_prime
-            revenue = users * self.alpha_prime[int(single_budget/self.resolution)][product_index][i] * weighted_price
+            #print("user:", i , "QQQQQQQ", users, int(users * self.alpha_prime[int(single_budget/self.resolution)][product_index][i]), users * (self.alpha_prime[int(single_budget/self.resolution)][product_index][i]))
+            revenue = int(users * self.alpha_prime[int(single_budget/self.resolution)][product_index][i]) * weighted_price
 
             # Sum with all user categories
             total_revenue += revenue
-
         return total_revenue
 
     def get_revenues_for_campaign(self, product_index):
@@ -125,8 +125,8 @@ class Optimizer:
                     table[i][j] = -np.inf
 
         np.set_printoptions(precision=2)
-        print(np.asarray([i for i in range(0,self.total_budget+self.resolution, self.resolution)]))
-        print(table)
+        #ee print(np.asarray([i for i in range(0,self.total_budget+self.resolution, self.resolution)]))
+        #ee print(table)
         # print(history)
         return table, history
 
@@ -161,7 +161,7 @@ class Optimizer:
             j = int(tempMax/self.resolution)
             k = int(history[i][j])
             optimal[i-1], tempMax = self.resolver(j, k)
-        print("Optimal: ")
-        print(optimal)
+        print("Optimal: ", optimal)
+        print("Money:", np.max(table[5]-np.array([i for i in range(0,self.total_budget+self.resolution, self.resolution)])))
         return optimal
 

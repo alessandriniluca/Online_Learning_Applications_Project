@@ -11,8 +11,8 @@ class User:
         self.features = features
         self.starting_product = starting_product
 
-    def has_bought(self, product):
-        return self.reservation_price[product.number] < product.price
+    def has_bought(self, product, stampa=False):
+        return self.reservation_price[product.number] > product.price
 
     def quantity_bought(self, product):
         return int(max(1., (np.random.normal(self.quantity_means[product.number], self.quantity_std_dev[product.number]))))
