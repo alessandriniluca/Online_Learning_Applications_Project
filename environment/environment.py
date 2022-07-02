@@ -1,9 +1,20 @@
+from common.utils import get_logger
 from environment.user import User
 import numpy as np
 
+
+def update_graph(graph, prod):
+    graph[:, prod.number] = 0
+    return graph
+
+
+logger = get_logger(__name__)
+
+
 class Environment:
 
-    def __init__(self, average_users_number, std_users, basic_alphas, alphas_functions, products, lambda_prob, graph_clicks):
+    def __init__(self, average_users_number, std_users, basic_alphas,
+                 alphas_functions, products, lambda_prob, graph_clicks):
         # parameters to select the number of users of the specific round
         self.average_users_number = average_users_number
         self.std_users = std_users
@@ -12,7 +23,7 @@ class Environment:
         self.basic_alphas = basic_alphas
         self.alphas_functions = alphas_functions
 
-        # labmda, given fixed by the problem
+        # lambda, given fixed by the problem
         self.lambda_prob = lambda_prob
 
         # products sold, 5 in this case
@@ -29,38 +40,40 @@ class Environment:
 
         self.users_per_round = []
 
+        logger.info("Environment initialized")
+
     def product_click(self, main_prod, secondary_prod):
         return np.random.uniform(0.0, 1.0) < self.graph_clicks[main_prod.number][secondary_prod.number]
 
-    def update_graph(self, graph, prod):
-        graph[:, prod.number] = 0
-        return graph
-
     def round(self, budget):
+        logger.info("Round started")
         # sample the total number of users for the problem
         n_users = np.random.normal(self.average_users_number, self.std_users)
-        print("Real users:", sum(n_users))
+        logger.debug("Real users: " + str(sum(n_users)))
+
+        # Compute alpha increments
         delta_increment = []
         for function in self.alphas_functions:
-            delta_increment.append(np.concatenate( (function(budget), np.array([0]) )))
+            delta_increment.append(np.concatenate((function(budget), np.array([0]))))
         res = self.basic_alphas + np.array(delta_increment)
         actual_alpha = np.array([])
         for i in range(len(res)):
-            actual_alpha = np.concatenate((actual_alpha, np.random.dirichlet(20*res[i]/sum(res[i]))), axis=0)                
+            actual_alpha = np.concatenate((actual_alpha, np.random.dirichlet(20 * res[i] / sum(res[i]))), axis=0)
         actual_alpha = actual_alpha.reshape(3, 6)
 
         # users_per_category = (n_users * actual_alpha).astype(int)
-        
-        users_per_category = (actual_alpha*n_users[:, np.newaxis]).astype(int)
+
+        users_per_category = (actual_alpha * n_users[:, np.newaxis]).astype(int)
         total_number_users = sum(users_per_category)
         print("Real users:", sum(total_number_users))
+
         rr = 0
         for r, u in zip(actual_alpha[:, 0], n_users):
-            rr += r*u
+            rr += r * u
         rr = rr / sum(n_users)
         print("-----------Budget:", budget[0], "alpha:", rr)
         # discard alpha_0, user that visit competitor's website 
-        users_per_category = (users_per_category[:, :5]) #.reshape(3, 5)
+        users_per_category = (users_per_category[:, :5])  # .reshape(3, 5)
         this_round_users = []
 
         for i in range(len(users_per_category)):
@@ -73,10 +86,10 @@ class Environment:
                         self.quantity_means[i],
                         self.quantity_std_dev[i],
                         user_class=i,
-                        features= [0,0] if i==0 else ([0,1] if i==1 else ([1, 1] if np.random.uniform(0,1) < 0.5 else [1,0])),
+                        features=[0, 0] if i == 0 else (
+                            [0, 1] if i == 1 else ([1, 1] if np.random.uniform(0, 1) < 0.5 else [1, 0])),
                         starting_product=j
                     )
-
 
                     this_round_users.append(user)
 
@@ -89,7 +102,7 @@ class Environment:
                     while len(product_queue) > 0:
                         prod = product_queue[0]
                         user.add_seen_product(prod)
-                        graph_clicks = self.update_graph(graph_clicks, prod)
+                        graph_clicks = update_graph(graph_clicks, prod)
                         # print(graph_clicks)
                         if user.has_bought(prod):
                             # print("\tbought product:", prod.number)
@@ -108,11 +121,3 @@ class Environment:
 
         self.users_per_round.append(this_round_users)
         return this_round_users, sum(total_number_users)
-                        
-
-
-                    
-
-
-
-
