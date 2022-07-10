@@ -1,6 +1,6 @@
 import numpy as np
 
-from to_be_evaluated.graph import Graph
+from optimizer.mc_estimator import Graph
 from environment.product import Product
 
 graph_clicks = np.array(

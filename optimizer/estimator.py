@@ -2,10 +2,10 @@ import numpy as np
 from environment.product import Product
 from statistics import NormalDist
 
-from to_be_evaluated.graph import Graph
+from optimizer.mc_estimator import Graph
 
 
-class Probabilities:
+class Estimator:
     def __init__(self, graph_clicks: np.ndarray, products: list, lambda_prob: float,
                  reservation_price_means: np.ndarray, reservation_price_std_dev: np.ndarray):
         """init function of the class. N.b.: products needs to be ordered by number.

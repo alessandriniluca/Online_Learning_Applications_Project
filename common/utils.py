@@ -27,8 +27,10 @@ def get_logger(file_name: str) -> logging.Logger:
     logger.setLevel(logging.DEBUG)  # the level is fixed to DEBUG
     return logger
 
+logger = get_logger(__name__)
 
 def load_static_configuration(path: str):
+    logger.debug("Loading configuration")
     # Check path
     if not exists(path):
         raise ValueError("Configuration file not found")

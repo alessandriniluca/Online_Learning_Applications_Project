@@ -2,9 +2,9 @@ import numpy as np
 
 from common.utils import load_static_configuration
 from environment.environment import Environment
-from optimizer.optimizer import Optimizer
-from optimizer.optimizer2 import Optimizer2
-from probability_calculator.probabilities import Probabilities
+from to_be_evaluated.optimizer import Optimizer
+from to_be_evaluated.optimizer2 import Optimizer2
+from optimizer.estimator import Estimator
 
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
@@ -16,12 +16,12 @@ env = Environment(
     configuration=configuration
 )
 
-calculator = Probabilities(env.configuration.graph_clicks,
-                           env.products,
-                           env.configuration.lambda_prob,
-                           env.configuration.reservation_price_means,
-                           env.configuration.reservation_price_std_dev
-                           )
+calculator = Estimator(env.configuration.graph_clicks,
+                       env.products,
+                       env.configuration.lambda_prob,
+                       env.configuration.reservation_price_means,
+                       env.configuration.reservation_price_std_dev
+                       )
 buy_probs = calculator.get_buy_probs()
 
 

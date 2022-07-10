@@ -2,8 +2,8 @@ import numpy as np
 from to_be_evaluated.MAB_step_3.GPTS_Alphas import GPTS_Alphas
 from environment.product import Product
 from environment.environment import Environment
-from optimizer.optimizer2 import Optimizer2
-from probability_calculator.probabilities import Probabilities
+from to_be_evaluated.optimizer2 import Optimizer2
+from optimizer.estimator import Estimator
 from matplotlib import pyplot as plt
 
 from step_4.quantities_estimator import QuantitiesEstimator
@@ -92,8 +92,8 @@ for e in range(0, n_experiments):
                                [.1, .8, .6, .8, .2]])
     )
 
-    calculator = Probabilities(env.graph_clicks, products, env.lambda_prob, env.reservation_price_means,
-                               env.reservation_price_std_dev)
+    calculator = Estimator(env.graph_clicks, products, env.lambda_prob, env.reservation_price_means,
+                           env.reservation_price_std_dev)
     buy_probs = calculator.get_buy_probs()
 
     ts_learners = GPTS_Alphas([int(total_budget / resolution + 1)] * 5, spaces)

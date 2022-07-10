@@ -1,8 +1,7 @@
 import numpy as np
 from environment.product import Product
 from environment.environment import Environment
-from probability_calculator.probabilities import Probabilities
-from statistics import NormalDist
+from optimizer.estimator import Estimator
 
 # TO DO: write correct different alpha functions
 alphas = np.array([[1, 2, 4, 5, 7, 15], [1, 2, 4, 9, 6, 16], [7, 5, 3, 2, 1, 15]])
@@ -46,7 +45,7 @@ env.round(budget=[50, 10, 20, 10, 10])
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 
-calculator = Probabilities(env.graph_clicks, products, env.lambda_prob, env.reservation_price_means, env.reservation_price_std_dev)
+calculator = Estimator(env.graph_clicks, products, env.lambda_prob, env.reservation_price_means, env.reservation_price_std_dev)
 probabilities_matrix = calculator.get_buy_probs()
 print(probabilities_matrix)
 

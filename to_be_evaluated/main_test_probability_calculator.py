@@ -1,7 +1,7 @@
 import numpy as np
 from environment.product import Product
 from environment.environment import Environment
-from probability_calculator.probabilities import Probabilities
+from optimizer.estimator import Estimator
 from statistics import NormalDist
 
 # TO DO: write correct different alpha functions
@@ -47,7 +47,7 @@ env.round(budget=[50, 10, 20, 10, 10])
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 
-calculator = Probabilities(env.graph_clicks, products, env.lambda_prob, env.reservation_price_means, env.reservation_price_std_dev)
+calculator = Estimator(env.graph_clicks, products, env.lambda_prob, env.reservation_price_means, env.reservation_price_std_dev)
 test = calculator.get_buy_probs()
 print(test)
 print("p1 buy =")

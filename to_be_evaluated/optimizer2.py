@@ -4,7 +4,9 @@ import numpy as np
 class Optimizer2:
 
     def __init__(self, user_number, min_budget, max_budget, resolution, mean_prices, mean_quantities, alphas, buy_prob):
+        # expected number of users per class
         self.user_number = user_number
+        # min budget array
         self.min_budget = min_budget
         self.max_budget = max_budget
         self.resolution = resolution

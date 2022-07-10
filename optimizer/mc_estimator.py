@@ -47,17 +47,17 @@ class Graph:
             self.actual_node = self.queue[0]
             mean = self.reservation_price_means[self.actual_node.number]
             std = self.reservation_price_std_dev[self.actual_node.number]
-            if (np.random.normal(mean, std) > self.actual_node.price):
+            if np.random.normal(mean, std) > self.actual_node.price:
                 copy_click_probabilities[:, self.actual_node.number] = 0
                 self.activations[self.actual_node.number] += 1
                 prob_click_a = copy_click_probabilities[self.actual_node.number][self.actual_node.secondary_a.number]
                 prob_click_b = self.lambda_prob * copy_click_probabilities[self.actual_node.number][
                     self.actual_node.secondary_b.number]
                 v = np.random.uniform(.0, 1.)
-                if (v < prob_click_a):
+                if v < prob_click_a:
                     self.queue.append(self.actual_node.secondary_a)
                 v = np.random.uniform(.0, 1.)
-                if (v < prob_click_b):
+                if v < prob_click_b:
                     self.queue.append(self.actual_node.secondary_b)
             self.queue = self.queue[1:]
 
