@@ -9,7 +9,7 @@ from probability_calculator.probabilities import Probabilities
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 
-configuration = load_static_configuration("configurations/static_conf_1.json")
+configuration = load_static_configuration("../configurations/static_conf_1.json")
 print(configuration)
 
 env = Environment(

@@ -1,8 +1,7 @@
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
-from sklearn.gaussian_process.kernels import Matern, WhiteKernel, ConstantKernel
 import numpy as np
-from MAB_step_3.learner import Learner
+from to_be_evaluated.MAB_step_3.learner import Learner
 from matplotlib import pyplot as plt
 
 

@@ -1,8 +1,7 @@
 import numpy as np
-from MAB_step_3.GPTS_Alphas import GPTS_Alphas
+from to_be_evaluated.MAB_step_3.GPTS_Alphas import GPTS_Alphas
 from environment.product import Product
 from environment.environment import Environment
-from optimizer.optimizer import Optimizer
 from optimizer.optimizer2 import Optimizer2
 from probability_calculator.probabilities import Probabilities
 from matplotlib import pyplot as plt

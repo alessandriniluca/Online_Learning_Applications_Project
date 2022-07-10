@@ -1,6 +1,6 @@
 import numpy as np
 
-from graph import Graph
+from to_be_evaluated.graph import Graph
 from environment.product import Product
 
 graph_clicks = np.array(

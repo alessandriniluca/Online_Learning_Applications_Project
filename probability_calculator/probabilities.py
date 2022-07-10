@@ -1,9 +1,8 @@
-from pydoc import doc
 import numpy as np
 from environment.product import Product
 from statistics import NormalDist
 
-from graph import Graph
+from to_be_evaluated.graph import Graph
 
 
 class Probabilities:

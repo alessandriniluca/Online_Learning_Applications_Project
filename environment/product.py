@@ -2,6 +2,9 @@ import numpy as np
 
 
 class Product:
+    """
+    Base class for product
+    """
     def __init__(self, name, price, number):
         self.name = name
         self.price = price

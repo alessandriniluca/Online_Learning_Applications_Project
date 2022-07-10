@@ -1,4 +1,4 @@
-from MAB_step_3.GPTS_Learner import GPTS_Learner
+from to_be_evaluated.MAB_step_3.GPTS_Learner import GPTS_Learner
 import numpy as np
 
 
