@@ -1,42 +1,27 @@
-from common.utils import get_logger
+from common.utils import get_logger, get_alpha_functions, get_products
 from environment.user import User
 import numpy as np
-
-
-def update_graph(graph, prod):
-    graph[:, prod.number] = 0
-    return graph
-
 
 logger = get_logger(__name__)
 
 
 class Environment:
+    """
+    This class defines the environment in which simulations will be performed
+    """
 
-    def __init__(self, average_users_number, std_users, basic_alphas,
-                 alphas_functions, products, lambda_prob, graph_clicks):
-        # parameters to select the number of users of the specific round
-        self.average_users_number = average_users_number
-        self.std_users = std_users
+    def __init__(self, configuration):
+        """
+        Args:
+            configuration (Configuration):
+                current environment configuration
+        """
 
-        # value of alpha, that will be between basic_alphas and basic_alphas + max(alphas_functions)
-        self.basic_alphas = basic_alphas
-        self.alphas_functions = alphas_functions
+        self.configuration = configuration
 
-        # lambda, given fixed by the problem
-        self.lambda_prob = lambda_prob
+        self.alphas_functions = get_alpha_functions(configuration.alphas_functions_parameters)
 
-        # products sold, 5 in this case
-        self.products = products
-
-        # click graph
-        self.graph_clicks = graph_clicks
-
-        self.reservation_price_means = np.array([[81, 34, 100, 49, 25], [85, 38, 103, 55, 20], [76, 30, 95, 45, 22]])
-        self.reservation_price_std_dev = np.array([[8, 8, 8, 8, 8], [8, 8, 8, 8, 8], [8, 8, 8, 8, 8]])
-
-        self.quantity_means = np.array([[15, 14, 4, 10, 8], [13, 14, 5, 11, 6], [14, 12, 3, 9, 8]])
-        self.quantity_std_dev = np.array([[5, 5, 2, 6, 5], [6, 6, 2, 4, 2], [4, 5, 1, 4, 4]])
+        self.products = get_products(configuration.products_parameters)
 
         self.users_per_round = []
 
@@ -102,7 +87,7 @@ class Environment:
                     while len(product_queue) > 0:
                         prod = product_queue[0]
                         user.add_seen_product(prod)
-                        graph_clicks = update_graph(graph_clicks, prod)
+                        graph_clicks = graph_clicks[:, prod.number] = 0
                         # print(graph_clicks)
                         if user.has_bought(prod):
                             # print("\tbought product:", prod.number)

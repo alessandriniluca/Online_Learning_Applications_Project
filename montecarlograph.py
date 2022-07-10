@@ -23,8 +23,8 @@ for i in range(5):
     g = Graph(
         click_probabilities=graph_clicks,
         products=products,
-        user_buy_price_mean=np.array([9, 14, 21, 8, 4]),
-        user_buy_price_std=np.array([2, 3, 2, 3, 3]),
+        reservation_price_means=np.array([9, 14, 21, 8, 4]),
+        reservation_price_std_dev=np.array([2, 3, 2, 3, 3]),
         lambda_prob=0.8
     )
     g.simulate(starting_product_number=i, spin=1000000)
