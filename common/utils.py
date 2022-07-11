@@ -27,10 +27,12 @@ def get_logger(file_name: str) -> logging.Logger:
     logger.setLevel(logging.DEBUG)  # the level is fixed to DEBUG
     return logger
 
+
 logger = get_logger(__name__)
 
-def load_static_configuration(path: str):
-    logger.debug("Loading configuration")
+
+def load_static_env_configuration(path: str):
+    logger.debug("Loading environment configuration")
     # Check path
     if not exists(path):
         raise ValueError("Configuration file not found")
@@ -95,3 +97,14 @@ def get_products(parameters):
         )
 
     return products
+
+
+def load_static_sim_configuration(path: str):
+    logger.debug("Loading simulation configuration")
+    # Check path
+    if not exists(path):
+        raise ValueError("Configuration file not found")
+
+    f = open(path)
+    configuration = json.load(f)
+    return configuration

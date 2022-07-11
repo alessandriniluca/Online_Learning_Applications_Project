@@ -1,6 +1,6 @@
 import numpy as np
 
-from common.utils import load_static_configuration
+from common.utils import load_static_env_configuration
 from environment.environment import Environment
 from to_be_evaluated.optimizer import Optimizer
 from to_be_evaluated.optimizer2 import Optimizer2
@@ -9,7 +9,7 @@ from optimizer.estimator import Estimator
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 
-configuration = load_static_configuration("../configurations/static_conf_1.json")
+configuration = load_static_env_configuration("../configurations/environment/static_conf_1.json")
 print(configuration)
 
 env = Environment(

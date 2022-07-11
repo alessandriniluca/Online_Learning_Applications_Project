@@ -1,6 +1,6 @@
 import numpy as np
 
-from common.utils import load_static_configuration, get_logger
+from common.utils import load_static_env_configuration, get_logger
 from environment.environment import Environment
 from optimizer.estimator import Estimator
 from optimizer.mc_estimator import Graph
@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 
 logger.info("Starting Simulation")
 
-configuration = load_static_configuration("../../configurations/static_conf_1.json")
+configuration = load_static_env_configuration("../../configurations/environment/static_conf_1.json")
 
 env = Environment(
     configuration=configuration
@@ -59,6 +59,6 @@ for class_index in range(len(env.configuration.reservation_price_means)):
                 check_passed = False
 
 if check_passed:
-    print("Estimation and exact values matches")
+    print("Estimation and MC Estimation are matching")
 
 

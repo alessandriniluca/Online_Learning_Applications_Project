@@ -14,7 +14,7 @@ class Environment:
     """
 
     def __init__(self, configuration):
-        """
+        self.configuration_ = """
         Args:
             configuration (Configuration):
                 current environment configuration
@@ -55,6 +55,13 @@ class Environment:
 
         # Compute new weights
         new_weights = self.configuration.basic_alphas + np.array(delta_increment)
+
+        # Now make sure that the previous sum of weights is the same of the new one
+        # Subtracting increment from alpha_zero
+        for class_index in range(len(new_weights)):
+            if sum(delta_increment[class_index]) > new_weights[class_index][5]:
+                raise ValueError("Delta increment exceeding alpha zero weights")
+            new_weights[class_index][5] -= sum(delta_increment[class_index])
 
         # Sample alphas for this round from dirichlet distributions
         actual_alpha = np.array([])
