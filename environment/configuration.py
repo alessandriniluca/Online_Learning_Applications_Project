@@ -10,7 +10,6 @@ class Configuration:
                  average_users_number,
                  std_users,
                  basic_alphas,
-                 alphas_functions_parameters,
                  products_parameters,
                  lambda_prob,
                  graph_clicks,
@@ -29,8 +28,6 @@ class Configuration:
                         array that contains starting weights of dirichlet distribution
                         that will provide values of alphas
                         note that we will have 6 weights for each class (18 weights in total)
-                    alphas_functions_parameters (list):
-                        alpha functions parameters
                     products_parameters (list):
                         list of products parameters
                     lambda_prob (float):
@@ -53,7 +50,6 @@ class Configuration:
 
         # always consider dirichlet weights
         self.basic_alphas = basic_alphas
-        self.alphas_functions_parameters = alphas_functions_parameters
 
         # lambda, given fixed by the problem
         self.lambda_prob = lambda_prob

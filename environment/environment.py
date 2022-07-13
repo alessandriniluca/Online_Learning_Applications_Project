@@ -1,6 +1,6 @@
 import math
 
-from common.utils import get_logger, get_alpha_functions, get_products
+from common.utils import get_logger, get_products
 from environment.product import Product
 from environment.user import User
 import numpy as np
@@ -13,17 +13,19 @@ class Environment:
     This class defines the environment in which simulations will be performed
     """
 
-    def __init__(self, configuration):
+    def __init__(self, configuration, alphas_functions):
         self.configuration_ = """
         Args:
             configuration (Configuration):
                 current environment configuration
+            alphas_functions (list):
+                set of alpha functions
         """
 
         self.configuration = configuration
 
         # Create alpha functions with given parameters
-        self.alphas_functions = get_alpha_functions(configuration.alphas_functions_parameters)
+        self.alphas_functions = alphas_functions
 
         # instantiate products from parameters
         self.products = get_products(configuration.products_parameters)

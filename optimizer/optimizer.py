@@ -25,8 +25,7 @@ class Optimizer:
                  prices,
                  mean_quantities,
                  alphas,
-                 buy_probs,
-                 exploit_context=False):
+                 buy_probs):
         self.users_number = users_number
         self.min_budget = min_budget
         self.max_budget = max_budget
@@ -36,18 +35,17 @@ class Optimizer:
         self.mean_quantities = mean_quantities
         self.alphas = alphas
         self.buy_prob = buy_probs
-        self.exploit_context = exploit_context
 
         self.number_of_budgets_to_evaluate = int(total_budget / resolution) + 1
 
         # Note that if I want to exploit context I will need to have multiple campaigns
-        self.number_of_campaigns = len(prices) * len(users_number) if exploit_context else len(prices)
+        self.number_of_campaigns = len(prices) * len(users_number)
 
         self.rows_income_per_budget = np.zeros((self.number_of_campaigns, self.number_of_budgets_to_evaluate))
         self.final_table = np.zeros((self.number_of_campaigns + 1, self.number_of_budgets_to_evaluate))
         self.partition = []
 
-    def compute_rows_with_context(self):
+    def compute_rows(self):
         # for each possible budget allocation
         for budget_index in range(int(self.total_budget / self.resolution) + 1):
             # for each campaign
@@ -73,38 +71,6 @@ class Optimizer:
                 self.rows_income_per_budget[campaign][budget_index] += int(
                     self.alphas[budget_index][starting_prod][
                         current_class] * self.users_number[current_class]) * expected_income_per_user
-
-    def compute_rows_no_context(self):
-        # for each user class
-        for class_index, users_of_current_class in enumerate(self.users_number):
-            # for each possible budget allocation
-            for budget_index in range(int(self.total_budget / self.resolution) + 1):
-                # for each campaign
-                for starting_prod in range(len(self.prices)):
-                    # compute expected income
-                    expected_income_per_user = 0
-                    for arrival_prod in range(len(self.prices)):
-                        expected_income_per_product = self.buy_prob[class_index][starting_prod][arrival_prod] * \
-                                                      self.prices[arrival_prod]
-                        # if data are aggregate
-                        if self.mean_quantities.shape[0] == 1:
-                            expected_income_per_user += expected_income_per_product * self.mean_quantities[0][
-                                arrival_prod]
-                        # else consider different quantity means of different classes
-                        else:
-                            expected_income_per_user += expected_income_per_product * self.mean_quantities[class_index][
-                                arrival_prod]
-
-                    # Check if we are estimating an aggregate, and thus we have just 5 alphas,
-                    # or disaggregate, with different classes and alphas
-                    if self.alphas.shape[2] == 1:
-                        self.rows_income_per_budget[starting_prod][budget_index] += int(
-                            self.alphas[budget_index][starting_prod][
-                                0] * users_of_current_class) * expected_income_per_user
-                    else:
-                        self.rows_income_per_budget[starting_prod][budget_index] += int(
-                            self.alphas[budget_index][starting_prod][
-                                class_index] * users_of_current_class) * expected_income_per_user
 
     def build_final_table(self):
         for row in range(1, self.number_of_campaigns + 1):
@@ -142,19 +108,12 @@ class Optimizer:
 
     def run_optimization(self):
         self.reset()
-        if self.exploit_context:
-            self.compute_rows_with_context()
-        else:
-            self.compute_rows_no_context()
+        self.compute_rows()
         self.build_final_table()
-
-    def set_exploit_context(self, exploit_context):
-        self.exploit_context = exploit_context
-        self.reset()
 
     def reset(self):
         self.number_of_campaigns = \
-            (len(self.prices) * len(self.users_number)) if self.exploit_context else len(self.prices)
+            (len(self.prices) * len(self.users_number))
         self.rows_income_per_budget = np.zeros((self.number_of_campaigns, self.number_of_budgets_to_evaluate))
         self.final_table = np.zeros((self.number_of_campaigns + 1, self.number_of_budgets_to_evaluate))
         self.partition = []

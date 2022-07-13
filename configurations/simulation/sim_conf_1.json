@@ -1,5 +1,5 @@
 {
-    "total_budget": 100,
+    "total_budget": 180,
     "resolution": 10,
     "min_budget": [0, 0, 0, 0, 0],
     "max_budget": [100, 100, 100, 100, 100]

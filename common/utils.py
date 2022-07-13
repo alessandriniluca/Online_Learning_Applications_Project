@@ -2,6 +2,7 @@ import logging
 from os.path import exists
 import json
 import numpy as np
+import copy
 
 from environment.configuration import Configuration
 from environment.product import Product
@@ -44,7 +45,6 @@ def load_static_env_configuration(path: str):
         parameters['average_users_number'],
         parameters['std_users'],
         parameters['basic_alphas'],
-        parameters['alphas_functions_parameters'],
         parameters['products_parameters'],
         parameters['lambda_prob'],
         parameters['graph_clicks'],
@@ -58,25 +58,6 @@ def load_static_env_configuration(path: str):
     f.close()
 
     return configuration
-
-
-def basic_exponential_alpha_function(parameters, budget):
-    return (parameters[0] * (1.0 - np.exp(parameters[1] * budget))).astype(int)
-
-
-def alphas_function_for_one_class(parameters_list, budgets):
-    assert len(parameters_list) == len(budgets)
-    increment = []
-    for i, budget in enumerate(budgets):
-        increment.append(basic_exponential_alpha_function(parameters_list[i], budget))
-    return increment
-
-
-def get_alpha_functions(parameters):
-    lambdas = []
-    for user_class_parameters in parameters:
-        lambdas.append(lambda x: alphas_function_for_one_class(user_class_parameters, x))
-    return lambdas
 
 
 def get_products(parameters):
@@ -108,3 +89,34 @@ def load_static_sim_configuration(path: str):
     f = open(path)
     configuration = json.load(f)
     return configuration
+
+def alphas_function_class_0(budget):
+    increment = [(30.0 * (1.0 - np.exp(-0.04 * (budget[0])))).astype(int),
+                 (10.0 * (1.0 - np.exp(-0.035 * (budget[1])))).astype(int),
+                 (15.0 * (1.0 - np.exp(-0.045 * (budget[2])))).astype(int),
+                 (25.0 * (1.0 - np.exp(-0.04 * (budget[3])))).astype(int),
+                 (60.0 * (1.0 - np.exp(-0.05 * (budget[4])))).astype(int)]
+    return np.array(increment)
+
+
+def alphas_function_class_1(budget):
+    increment = [(25.0 * (1.0 - np.exp(-0.043 * (budget[0])))).astype(int),
+                 (15.0 * (1.0 - np.exp(-0.039 * (budget[1])))).astype(int),
+                 (10.0 * (1.0 - np.exp(-0.045 * (budget[2])))).astype(int),
+                 (10.0 * (1.0 - np.exp(-0.03 * (budget[3])))).astype(int),
+                 (70.0 * (1.0 - np.exp(-0.029 * (budget[4])))).astype(int)]
+
+    return np.array(increment)
+
+
+def alphas_function_class_2(budget):
+    increment = [(30.0 * (1.0 - np.exp(-0.038 * (budget[0])))).astype(int),
+                 (10.0 * (1.0 - np.exp(-0.045 * (budget[1])))).astype(int),
+                 (50.0 * (1.0 - np.exp(-0.045 * (budget[2])))).astype(int),
+                 (15.0 * (1.0 - np.exp(-0.044 * (budget[3])))).astype(int),
+                 (45.0 * (1.0 - np.exp(-0.043 * (budget[4])))).astype(int)]
+    return np.array(increment)
+
+
+def get_test_alphas_functions():
+    return [alphas_function_class_0, alphas_function_class_1, alphas_function_class_2]
