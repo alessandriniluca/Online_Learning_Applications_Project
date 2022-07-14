@@ -13,7 +13,7 @@ test_env = Environment(
     alphas_functions=alphas_functions
 )
 
-test_env.round([0, 10, 0, 20, 0])
+test_env.round([0, 10, 0, 20, 0, 0, 20, 0, 0, 0, 10, 0, 0, 0, 0])
 
 print(test_env.alphas_functions[0]([100,0,0,0,0]))
 

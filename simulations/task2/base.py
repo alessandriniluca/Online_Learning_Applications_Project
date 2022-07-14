@@ -38,29 +38,37 @@ prices = []
 for product in products:
     prices.append(product.price)
 
-# Compute all alpha primes: the new alpha ratio that I will have if a budget was allocated
-# Note that we will get expected value of dirichlet variables that are used to sample alphas
-alphas_prime = np.zeros((int(total_budget / resolution) + 1, len(products), 3))
-# for each budget allocation
-for budget_index, single_budget in enumerate(range(0, total_budget + resolution, resolution)):
-    # for each product
-    for product_index in range(len(products)):
-        # for each class of user
-        for class_index, users_of_current_class in enumerate(env.configuration.average_users_number):
-            # set budget to corresponding product (using array with zeros for alpha function compatibility)
-            # allocate just for one product the budget
-            budgets = np.zeros(5)
-            budgets[product_index] = single_budget
 
-            # compute deltas of weights
-            delta_alpha_weights = env.alphas_functions[class_index](budgets)
 
-            expected_new_weight = env.configuration.basic_alphas[class_index][product_index] + delta_alpha_weights[product_index]
-            expected_new_alpha = expected_new_weight / sum(env.configuration.basic_alphas[class_index])
+def build_alphas_prime(one_per_product):
+    # Compute all alpha primes: the new alpha ratio that I will have if a budget was allocated
+    # Note that we will get expected value of dirichlet variables that are used to sample alphas
+    alphas_prime = np.zeros((int(total_budget / resolution) + 1, len(products), 3))
+    # for each budget allocation
+    for budget_index, single_budget in enumerate(range(0, total_budget + resolution, resolution)):
+        # for each product
+        for product_index in range(len(products)):
+            # for each class of user
+            for class_index, users_of_current_class in enumerate(env.configuration.average_users_number):
+                # set budget to corresponding product (using array with zeros for alpha function compatibility)
+                # allocate just for one product the budget
+                budgets = np.zeros(5)
+                if one_per_product:
+                    budgets[product_index] = single_budget/sum(env.configuration.average_users_number)*users_of_current_class
+                else:
+                    budgets[product_index] = single_budget
 
-            alphas_prime[budget_index][product_index][class_index] = expected_new_alpha
+                # compute deltas of weights
 
-print(alphas_prime)
+                delta_alpha_weights = env.alphas_functions[class_index](budgets)
+
+                expected_new_weight = env.configuration.basic_alphas[class_index][product_index] + delta_alpha_weights[product_index]
+                expected_new_alpha = expected_new_weight / sum(env.configuration.basic_alphas[class_index])
+
+                alphas_prime[budget_index][product_index][class_index] = expected_new_alpha
+
+    print(alphas_prime)
+    return alphas_prime
 
 optimizer = Optimizer(
     users_number=env.configuration.average_users_number,
@@ -70,7 +78,7 @@ optimizer = Optimizer(
     resolution=resolution,
     prices=prices,
     mean_quantities=env.configuration.quantity_means,
-    alphas=alphas_prime,
+    alphas=build_alphas_prime(False),
     buy_probs=buy_probs
 )
 
@@ -78,6 +86,18 @@ optimizer = Optimizer(
 optimizer.run_optimization()
 best_allocation = optimizer.find_best_allocation()
 print(best_allocation)
+
+optimizer = Optimizer(
+    users_number=env.configuration.average_users_number,
+    min_budget=min_budget,
+    max_budget=max_budget,
+    total_budget=total_budget,
+    resolution=resolution,
+    prices=prices,
+    mean_quantities=env.configuration.quantity_means,
+    alphas=build_alphas_prime(True),
+    buy_probs=buy_probs
+)
 
 # Optimize 5 campaigns
 optimizer.one_campaign_per_product = True

@@ -49,9 +49,26 @@ class Environment:
         logger.debug("TOTAL users in this round: " + str(math.ceil(sum(n_users))))
 
         # Compute alpha increments
+
+        temp_budget = []
+        if(len(budget) == 5):
+            for i in range(len(self.configuration.average_users_number)):
+                budget_per_class = []
+                for j in range((len(budget))):
+                    budget_per_class.append(budget[j]/sum(self.configuration.average_users_number)*self.configuration.average_users_number[i])
+                temp_budget.append(budget_per_class)
+        else:
+            for i in range(len(self.configuration.average_users_number)):
+                budget_per_class = []
+                for j in range(int(len(budget) / len(self.configuration.average_users_number))):
+                    budget_per_class.append(budget[i*int(len(budget) / len(self.configuration.average_users_number))+j])
+                temp_budget.append(budget_per_class)
+
+        budget = temp_budget
+
         delta_increment = []
-        for function in self.alphas_functions:
-            delta_increment.append(np.concatenate((function(budget), np.array([0]))))
+        for i, function in enumerate(self.alphas_functions):
+            delta_increment.append(np.concatenate((function(budget[i]), np.array([0]))))
 
         logger.debug("Delta increments: " + str(delta_increment))
 
