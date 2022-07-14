@@ -79,6 +79,12 @@ optimizer.run_optimization()
 best_allocation = optimizer.find_best_allocation()
 print(best_allocation)
 
+# Optimize 5 campaigns
+optimizer.one_campaign_per_product = True
+optimizer.run_optimization()
+best_allocation = optimizer.find_best_allocation()
+print(best_allocation)
+
 
 if __name__ == '__main__':
     print("simulation done")
