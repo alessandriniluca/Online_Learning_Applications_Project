@@ -67,7 +67,7 @@ class Optimizer:
                     expected_income_per_user += expected_income_per_product * self.mean_quantities[current_class][
                         arrival_prod]
 
-                self.rows_income_per_budget[campaign][budget_index] += int(
+                self.rows_income_per_budget[campaign][budget_index] = int(
                     self.alphas[budget_index][starting_prod][
                         current_class] * self.users_number[current_class]) * expected_income_per_user
 
@@ -83,7 +83,7 @@ class Optimizer:
                         for arrival_prod in range(len(self.prices)):
                             expected_income_per_product = self.buy_prob[class_index][starting_prod][arrival_prod] * \
                                                           self.prices[arrival_prod]
-                            # if data are aggregate
+                            # if data are aggregate TODO
                             if self.mean_quantities.shape[0] == 1:
                                 expected_income_per_user += expected_income_per_product * self.mean_quantities[0][
                                     arrival_prod]
