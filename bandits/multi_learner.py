@@ -1,0 +1,31 @@
+from bandits.gpucb1 import GPUCB1_Learner
+from common.utils import LearnerType
+from to_be_evaluated.MAB_step_3.GPTS_Learner import GPTS_Learner
+import numpy as np
+
+
+class MultiLearner:
+    def __init__(self, n_arms, arms, learner_type, n_learners=5):
+        """
+    n_arms: number of budgets we want to try
+    arms: values of the budget to try
+    """
+        self.n_arms = n_arms
+        self.n_learners = n_learners
+        self.learner_type = learner_type
+        self.learners = []
+        for i in range(n_learners):
+            if learner_type == LearnerType.TS:
+                self.learners.append(GPTS_Learner(n_arms, arms, "learner_" + str(i)))
+            elif learner_type == LearnerType.UCB1:
+                self.learners.append(GPUCB1_Learner(n_arms, arms, "learner_" + str(i)))
+
+    def get_expected_rewards(self):
+        alphas_prime = np.zeros((self.n_arms, self.n_learners, 1))
+        for i in range(len(self.learners)):
+            alphas_prime[:, i, 0] = self.learners[i].get_expected_rewards()
+        return alphas_prime
+
+    def update(self, pulled_arms, rewards):
+        for i, arm in enumerate(pulled_arms):
+            self.learners[i].update(arm, rewards[i])

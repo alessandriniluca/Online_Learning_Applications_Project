@@ -1,8 +1,8 @@
+import enum
 import logging
 from os.path import exists
 import json
 import numpy as np
-import copy
 
 from environment.configuration import Configuration
 from environment.product import Product
@@ -128,3 +128,12 @@ def get_prices(products):
     for product in products:
         prices.append(product.price)
     return prices
+
+
+class LearnerType(enum.Enum):
+    """
+    Learner types
+    """
+
+    TS = enum.auto()
+    UCB1 = enum.auto()

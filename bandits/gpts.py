@@ -9,8 +9,8 @@ class GPTS_Learner(Learner):
     """
     GPTS implementation
     """
-    def __init__(self, n_arms, arms):
-        super().__init__(n_arms)
+    def __init__(self, n_arms, arms, name=""):
+        super().__init__(n_arms, name)
         self.arms = arms
         self.means = np.zeros(self.n_arms)
         self.sigmas = np.ones(self.n_arms) * 8
