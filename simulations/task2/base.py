@@ -3,6 +3,7 @@ import numpy as np
 from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions
 from environment.environment import Environment
 from optimizer.estimator import Estimator
+from optimizer.full_optimizer import FullOptimizer
 from optimizer.optimizer import Optimizer
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
@@ -26,7 +27,7 @@ estimator = Estimator(env.configuration.graph_clicks,
 
 buy_probs = estimator.get_buy_probs()
 
-optimizer = Optimizer(
+optimizer = FullOptimizer(
     users_number=env.configuration.average_users_number,
     min_budget=sim_configuration["min_budget"],
     max_budget=sim_configuration["max_budget"],

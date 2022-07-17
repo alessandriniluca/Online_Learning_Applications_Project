@@ -1,51 +1,6 @@
 import numpy as np
 
-
-def compute_alphas_prime(total_budget,
-                         resolution,
-                         products,
-                         average_users_number,
-                         basic_alphas,
-                         alphas_functions,
-                         one_per_product):
-    # Compute all alpha primes: the new alpha ratio that I will have if a budget was allocated
-    # Note that we will get expected value of dirichlet variables that are used to sample alphas
-    alphas_prime = np.zeros((int(total_budget / resolution) + 1, len(products), 3))
-    # for each budget allocation
-    for budget_index, single_budget in enumerate(range(0, total_budget + resolution, resolution)):
-        # for each product
-        for product_index in range(len(products)):
-            # for each class of user
-            for class_index, users_of_current_class in enumerate(average_users_number):
-                # set budget to corresponding product (using array with zeros for alpha function compatibility)
-                # allocate just for one product the budget
-                budgets = np.zeros(len(products))
-
-                # if I have only one campaign per product (data are aggregate)
-                # my budget will split between different class of users proportionally to the number of users
-                # of the corresponding class
-                if one_per_product:
-                    budgets[product_index] = single_budget / sum(average_users_number) * users_of_current_class
-                else:
-                    budgets[product_index] = single_budget
-
-                # compute deltas of weights
-
-                delta_alpha_weights = alphas_functions[class_index](budgets)
-
-                expected_new_weight = basic_alphas[class_index][product_index] + delta_alpha_weights[product_index]
-                expected_new_alpha = expected_new_weight / sum(basic_alphas[class_index])
-
-                alphas_prime[budget_index][product_index][class_index] = expected_new_alpha
-
-    return alphas_prime
-
-
-def get_prices(products):
-    prices = []
-    for product in products:
-        prices.append(product.price)
-    return prices
+from common.utils import get_prices
 
 
 class Optimizer:
@@ -72,8 +27,7 @@ class Optimizer:
                  products,
                  mean_quantities,
                  buy_probs,
-                 basic_alphas,
-                 alphas_functions,
+                 alphas,
                  one_campaign_per_product=False):
         self.users_number = users_number
         self.min_budget = min_budget
@@ -84,17 +38,9 @@ class Optimizer:
         self.prices = get_prices(products)
         self.mean_quantities = mean_quantities
         self.buy_prob = buy_probs
-        self.basic_alphas = basic_alphas
-        self.alphas_functions = alphas_functions
         self._one_campaign_per_product = one_campaign_per_product
 
-        self.alphas = compute_alphas_prime(total_budget,
-                                           resolution,
-                                           products,
-                                           users_number,
-                                           basic_alphas,
-                                           alphas_functions,
-                                           one_campaign_per_product)
+        self.alphas = alphas
 
         self.number_of_budgets_to_evaluate = int(total_budget / resolution) + 1
 
@@ -104,25 +50,6 @@ class Optimizer:
         self.rows_income_per_budget = np.zeros((self.number_of_campaigns, self.number_of_budgets_to_evaluate))
         self.final_table = np.zeros((self.number_of_campaigns + 1, self.number_of_budgets_to_evaluate))
         self.partition = []
-
-    @property
-    def one_campaign_per_product(self):
-        return self._one_campaign_per_product
-
-    # one_campaign_per_product setter function
-    @one_campaign_per_product.setter
-    def one_campaign_per_product(self, new_value):
-        # in order to improve efficiency
-        if self._one_campaign_per_product != new_value:
-            self._one_campaign_per_product = new_value
-            self.alphas = compute_alphas_prime(self.total_budget,
-                                               self.resolution,
-                                               self.products,
-                                               self.users_number,
-                                               self.basic_alphas,
-                                               self.alphas_functions,
-                                               self.one_campaign_per_product)
-
 
     def compute_rows(self):
         # for each possible budget allocation
@@ -228,3 +155,6 @@ class Optimizer:
         self.rows_income_per_budget = np.zeros((self.number_of_campaigns, self.number_of_budgets_to_evaluate))
         self.final_table = np.zeros((self.number_of_campaigns + 1, self.number_of_budgets_to_evaluate))
         self.partition = []
+
+    def set_alphas(self, alphas):
+        self.alphas = alphas

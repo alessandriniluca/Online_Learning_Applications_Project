@@ -90,6 +90,7 @@ def load_static_sim_configuration(path: str):
     configuration = json.load(f)
     return configuration
 
+
 def alphas_function_class_0(budget):
     increment = [(30.0 * (1.0 - np.exp(-0.04 * (budget[0])))).astype(int),
                  (10.0 * (1.0 - np.exp(-0.035 * (budget[1])))).astype(int),
@@ -120,3 +121,10 @@ def alphas_function_class_2(budget):
 
 def get_test_alphas_functions():
     return [alphas_function_class_0, alphas_function_class_1, alphas_function_class_2]
+
+
+def get_prices(products):
+    prices = []
+    for product in products:
+        prices.append(product.price)
+    return prices
