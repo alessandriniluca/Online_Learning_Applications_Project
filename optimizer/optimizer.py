@@ -86,7 +86,7 @@ class Optimizer:
         self.buy_prob = buy_probs
         self.basic_alphas = basic_alphas
         self.alphas_functions = alphas_functions
-        self.one_campaign_per_product = one_campaign_per_product
+        self._one_campaign_per_product = one_campaign_per_product
 
         self.alphas = compute_alphas_prime(total_budget,
                                            resolution,
@@ -104,6 +104,24 @@ class Optimizer:
         self.rows_income_per_budget = np.zeros((self.number_of_campaigns, self.number_of_budgets_to_evaluate))
         self.final_table = np.zeros((self.number_of_campaigns + 1, self.number_of_budgets_to_evaluate))
         self.partition = []
+
+    @property
+    def one_campaign_per_product(self):
+        return self._one_campaign_per_product
+
+    # one_campaign_per_product setter function
+    @one_campaign_per_product.setter
+    def one_campaign_per_product(self, new_value):
+        # in order to improve efficiency
+        if self._one_campaign_per_product != new_value:
+            self._one_campaign_per_product = new_value
+            self.alphas = compute_alphas_prime(self.total_budget,
+                                               self.resolution,
+                                               self.products,
+                                               self.users_number,
+                                               self.basic_alphas,
+                                               self.alphas_functions,
+                                               self.one_campaign_per_product)
 
 
     def compute_rows(self):
@@ -198,13 +216,6 @@ class Optimizer:
 
     def run_optimization(self):
         self.reset()
-        self.alphas = compute_alphas_prime(self.total_budget,
-                                           self.resolution,
-                                           self.products,
-                                           self.users_number,
-                                           self.basic_alphas,
-                                           self.alphas_functions,
-                                           self.one_campaign_per_product)
         if self.one_campaign_per_product:
             self.compute_rows_aggregate_campaigns()
         else:
