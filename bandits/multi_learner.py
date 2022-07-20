@@ -26,6 +26,12 @@ class MultiLearner:
             alphas_prime[:, i, 0] = self.learners[i].get_expected_rewards()
         return alphas_prime
 
+
     def update(self, pulled_arms, rewards):
+        """
+        Args:
+            pulled_arms (list): list of the arms pulled (5 elements in aggregate case, 15 otherwise)
+            rewards (list of lists): the i-th sub-list will contain the rewards for bandit i
+        """
         for i, arm in enumerate(pulled_arms):
             self.learners[i].update(arm, rewards[i])

@@ -55,8 +55,10 @@ class GPTS_Learner(Learner):
         This method update the GPTS state and internal model
         """
         self.t += 1
-        self.update_observations(pulled_arm, reward)
+        for r in reward:
+            self.update_observations(pulled_arm, r)
         self.update_model()
+
 
     def get_expected_rewards(self):
         """

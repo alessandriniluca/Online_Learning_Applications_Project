@@ -52,12 +52,14 @@ class GPUCB1_Learner(Learner):
         # sigma lower bound
         self.sigmas = np.maximum(self.sigmas, 1e-2)
 
+
     def update(self, pulled_arm, reward):
         """
         This method update the GPTS state and internal model
         """
         self.t += 1
-        self.update_observations(pulled_arm, reward)
+        for r in reward:
+            self.update_observations(pulled_arm, r)
         self.update_model()
 
     def get_expected_rewards(self):
