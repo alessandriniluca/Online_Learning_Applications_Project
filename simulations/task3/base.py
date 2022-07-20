@@ -46,6 +46,7 @@ optimizer = FullOptimizer(
 )
 
 # Optimize 5 campaigns with all data known to compute the baseline
+optimizer.one_campaign_per_product = True
 optimizer.run_optimization()
 best_allocation = optimizer.find_best_allocation()
 print(best_allocation)
@@ -61,8 +62,8 @@ budgets = np.linspace(0, sim_configuration["total_budget"], n_arms)
 
 for e in range(0, n_experiments):
     # Initialize a bandits to estimate alpha functions
-    gpucb_learners = MultiLearner(n_campaigns, budgets, LearnerType.UCB1)
-    gpts_learners = MultiLearner(n_campaigns, budgets, LearnerType.TS)
+    gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=n_campaigns)
+    gpts_learners = MultiLearner(n_arms, budgets, LearnerType.TS, n_learners=n_campaigns)
 
     # TODO note that GPUCB needs to pull every arm when started... combinatorial constraints need to be considered
 
