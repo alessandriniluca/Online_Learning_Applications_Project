@@ -98,7 +98,7 @@ class EnvironmentCompleteHistory(Environment):
                             [0, 1] if class_index == 1 else ([1, 1] if np.random.uniform(0, 1) < 0.5 else [1, 0])),
                         starting_product=start_product_index,
                         # Using the up-to-now estimated graph
-                        graph_clicks=self.estimated_graph_clicks.copy()
+                        graph_clicks=self.configuration.graph_clicks.copy()
                     )
 
                     this_round_users.append(user)
@@ -126,17 +126,24 @@ class EnvironmentCompleteHistory(Environment):
                             # if click on 1st secondary
                             if user.product_click(prod, prod.secondary_a):
                                 product_queue.append(prod.secondary_a)
-                                history.append((prod.number, prod.secondary_a.number))
+                                history.append((prod.number, prod.secondary_a.number, True))
+                            else:
+                                history.append((prod.number, prod.secondary_a.number, False))
 
 
                             # if click on 2nd secondary
                             if np.random.uniform(0.0, 1.0) < self.configuration.lambda_prob:
                                 if user.product_click(prod, prod.secondary_b):
                                     product_queue.append(prod.secondary_b)
-                                    history.append((prod.number, prod.secondary_b.number))
+                                    history.append((prod.number, prod.secondary_b.number, True))
+                                else:
+                                    history.append((prod.number, prod.secondary_b.number, False))
+                            else:
+                                history.append((prod.number, prod.secondary_b.number, False))
 
                         # remove the product from the queue
                         product_queue = product_queue[1:]
+
                     users_history.append(history)
 
         # update history
@@ -144,5 +151,5 @@ class EnvironmentCompleteHistory(Environment):
 
         return users_history
 
-    def set_graph_estimation(self, estimation):
-        self.estimated_graph_clicks = estimation
+    # def set_graph_estimation(self, estimation):
+    #     self.estimated_graph_clicks = estimation

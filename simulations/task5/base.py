@@ -15,8 +15,8 @@ env_configuration = load_static_env_configuration("../../configurations/environm
 sim_configuration = load_static_sim_configuration("../../configurations/simulation/sim_conf_1.json")
 alphas_functions = get_test_alphas_functions()
 
-ROUNDS = 10
-N_EXPERIMENTS = 20
+ROUNDS = 10000
+N_EXPERIMENTS = 1
 
 env = EnvironmentCompleteHistory(
     configuration=env_configuration,
@@ -25,10 +25,7 @@ env = EnvironmentCompleteHistory(
 
 graph_estimator = GraphWeightsEstimator(env.configuration.lambda_prob, len(env.products), env.products)
 
-# initial setting of the estimation, it will be all zeroes
-env.set_graph_estimation(graph_estimator.get_estimated_graph())
-
-estimator = Estimator(env.estimated_graph_clicks,
+estimator = Estimator(graph_estimator.get_estimated_graph(),
                       env.products,
                       env.configuration.lambda_prob,
                       env.configuration.reservation_price_means,
@@ -53,12 +50,6 @@ optimizer = FullOptimizer(
 
 for experiment in range(N_EXPERIMENTS):
     for round in range(ROUNDS):
-        # Optimize 15 campaigns
-        # optimizer.run_optimization()
-        # best_allocation = optimizer.find_best_allocation()
-        # print(best_allocation)
-
-        # Optimize 5 campaigns
 
         #set probabilities
         buy_probs = estimator.get_buy_probs()
@@ -74,6 +65,7 @@ for experiment in range(N_EXPERIMENTS):
         # Update graph probabilities according to users history
         graph_estimator.update_graph_probabilities(users_history)
         estimator.update_graph_clicks(graph_estimator.get_estimated_graph())
+        print("!!!!!!!!!!estimated graph: \n", graph_estimator.get_estimated_graph())
 
         print("!!!ROUND ", round, " Experiment ", experiment, ": ")
         print(best_allocation)

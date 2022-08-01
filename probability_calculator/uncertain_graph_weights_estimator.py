@@ -17,6 +17,7 @@ class GraphWeightsEstimator():
         self.prod_number = prod_number
         # Initialization of the graph that will be updated after each round
         self.graph = np.zeros((prod_number, prod_number))
+        self.seen = np.zeros((prod_number, prod_number))
         # Initialization of the number of users, that will be updated after each step
         self.user_number = 0
     
@@ -39,8 +40,13 @@ class GraphWeightsEstimator():
             for visit in user:
                 start_product = visit[0]
                 end_product = visit[1]
+                clicked = visit[2]
                 # Update the visits in the matrix
-                self.graph[start_product][end_product]+=1
+                if clicked:
+                    self.graph[start_product][end_product]+=1
+                self.seen[start_product][end_product]+=1
+
+        print("GRAFOO", self.graph)
     
     def get_estimated_graph(self):
         """Return the estimation of graph weights
@@ -51,7 +57,9 @@ class GraphWeightsEstimator():
         # Compute the probability
         if(self.user_number == 0):
             return self.graph.copy()
-        returned_graph = self.graph.copy()/self.user_number
+        seen = self.seen.copy()
+        seen[seen==0] = 1
+        returned_graph = self.graph/seen
         for product in self.products:
             # This for adjusts the seoncdary_b of each products: their visits are multiplied by lambda.
             start = product.number
