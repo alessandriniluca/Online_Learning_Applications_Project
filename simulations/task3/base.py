@@ -65,9 +65,7 @@ for e in range(0, n_experiments):
     gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=n_campaigns)
     gpts_learners = MultiLearner(n_arms, budgets, LearnerType.TS, n_learners=n_campaigns)
 
-    # TODO note that GPUCB needs to pull every arm when started... combinatorial constraints need to be considered
-
-    # Ask for estimations (get alpha primes
+    # Ask for estimations (get alpha primes)
 
     # Run optimization
 

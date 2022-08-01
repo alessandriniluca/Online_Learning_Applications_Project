@@ -8,7 +8,7 @@ np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 
 
 def fun(x):
-    return (200.0 * (1.0 - np.exp(-0.02 * x))).astype(int)
+    return (200.0 * (1.0 - np.exp(-0.01 * x))).astype(int)
 
 
 class SimpleTestEnv:
@@ -21,7 +21,7 @@ class SimpleTestEnv:
         return np.random.normal(self.means[pulled_arm], self.sigmas[pulled_arm])
 
 
-n_arms = 20
+n_arms = 10
 min_budget = 0
 max_budget = 180
 budgets = np.linspace(min_budget, max_budget, n_arms)
@@ -48,20 +48,16 @@ for e in range(0, n_experiments):
         reward = env.round(arm_to_play)
         reward = reward - budgets[arm_to_play]
         # Update the learner
-        gpts_learner.update(arm_to_play, reward)
+        gpts_learner.update([arm_to_play], [reward])
 
         # Get expected reward for each arm
-        arm_to_play = 0
-        if gpucb_learner.t < len(gpts_learner.arms):
-            arm_to_play = gpucb_learner.t
-        else:
-            expected_rewards = gpucb_learner.get_expected_rewards()
-            arm_to_play = np.argmax(expected_rewards)
+        expected_rewards = gpucb_learner.get_expected_rewards()
+        arm_to_play = np.argmax(expected_rewards)
         # Play the selected arm
         reward = env.round(arm_to_play)
         reward = reward - budgets[arm_to_play]
         # Update the learner
-        gpucb_learner.update(arm_to_play, reward)
+        gpucb_learner.update([arm_to_play], [reward])
 
     gpts_rewards_per_experiment.append(gpts_learner.collected_rewards)
     gpucb_rewards_per_experiment.append(gpucb_learner.collected_rewards)

@@ -11,6 +11,7 @@ class GPUCB1_Learner(Learner):
     """
     GPUCB implementation
     """
+
     def __init__(self, n_arms, arms, name=""):
         super().__init__(n_arms, name)
         self.arms = arms
@@ -52,7 +53,6 @@ class GPUCB1_Learner(Learner):
         # sigma lower bound
         self.sigmas = np.maximum(self.sigmas, 1e-2)
 
-
     def update(self, pulled_arm, reward):
         """
         This method update the GPTS state and internal model
@@ -66,9 +66,5 @@ class GPUCB1_Learner(Learner):
         """
         Return expected rewards that will be provided to an optimizer to complete the combinatorial Bandit
         """
-        upper_bounds = np.zeros(len(self.arms))
-        for arm_index, arm in enumerate(self.arms):
-            upper_bound = self.means[arm_index]
-            upper_bound += sqrt((2*log(self.t))/self.pulled_arms.count(arm))
-            upper_bounds[arm_index] = upper_bound
+        upper_bounds = self.means + self.sigmas
         return upper_bounds

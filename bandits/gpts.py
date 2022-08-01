@@ -59,7 +59,6 @@ class GPTS_Learner(Learner):
             self.update_observations(pulled_arm, r)
         self.update_model()
 
-
     def get_expected_rewards(self):
         """
         Return expected rewards that will be provided to an optimizer to complete the combinatorial Bandit
