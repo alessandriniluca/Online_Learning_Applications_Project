@@ -26,6 +26,7 @@ class GraphWeightsEstimator():
         """
         self.graph = np.zeros((self.prod_number, self.prod_number))
         self.user_number = 0
+        self.seen = np.zeros((self.prod_number, self.prod_number))
     
     def update_graph_probabilities(self, visits):
         """Update the graph estimated probability after each round
@@ -60,10 +61,4 @@ class GraphWeightsEstimator():
         seen = self.seen.copy()
         seen[seen==0] = 1
         returned_graph = self.graph/seen
-        for product in self.products:
-            # This for adjusts the seoncdary_b of each products: their visits are multiplied by lambda.
-            start = product.number
-            end = product.secondary_b.number
-            # It is divided by lambda because the visits of the secondaries are multiplied by the lambda of the problem.
-            returned_graph[start][end] = returned_graph[start][end]/self.lamb
         return returned_graph

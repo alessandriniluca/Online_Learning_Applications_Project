@@ -126,20 +126,22 @@ class EnvironmentCompleteHistory(Environment):
                             # if click on 1st secondary
                             if user.product_click(prod, prod.secondary_a):
                                 product_queue.append(prod.secondary_a)
-                                history.append((prod.number, prod.secondary_a.number, True))
+                                if prod.secondary_a not in user.seen_product:
+                                    history.append((prod.number, prod.secondary_a.number, True))
                             else:
-                                history.append((prod.number, prod.secondary_a.number, False))
+                                if prod.secondary_a not in user.seen_product:
+                                    history.append((prod.number, prod.secondary_a.number, False))
 
 
                             # if click on 2nd secondary
                             if np.random.uniform(0.0, 1.0) < self.configuration.lambda_prob:
                                 if user.product_click(prod, prod.secondary_b):
                                     product_queue.append(prod.secondary_b)
-                                    history.append((prod.number, prod.secondary_b.number, True))
+                                    if prod.secondary_b not in user.seen_product:
+                                        history.append((prod.number, prod.secondary_b.number, True))
                                 else:
-                                    history.append((prod.number, prod.secondary_b.number, False))
-                            else:
-                                history.append((prod.number, prod.secondary_b.number, False))
+                                    if prod.secondary_b not in user.seen_product:
+                                        history.append((prod.number, prod.secondary_b.number, False))
 
                         # remove the product from the queue
                         product_queue = product_queue[1:]
