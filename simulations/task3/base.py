@@ -62,18 +62,42 @@ budgets = np.linspace(0, sim_configuration["total_budget"], n_arms)
 
 for e in range(0, n_experiments):
     # Initialize a bandits to estimate alpha functions
-    gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=n_campaigns)
+    # TODO forse meglio gestire due simulazioni differenti, una per TS e una per UCB
+    #      meglio fissare un seed per i generatori random così da poter riprodurre e confrontare
+    #      gli esperimenti
+    # gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=n_campaigns)
     gpts_learners = MultiLearner(n_arms, budgets, LearnerType.TS, n_learners=n_campaigns)
 
     # Ask for estimations (get alpha primes)
+    ts_alpha_prime = gpts_learners.get_expected_rewards()
 
     # Run optimization
+    optimizer = Optimizer(
+        users_number=env.configuration.average_users_number,
+        min_budget=sim_configuration["min_budget"],
+        max_budget=sim_configuration["max_budget"],
+        total_budget=sim_configuration["total_budget"],
+        resolution=sim_configuration["resolution"],
+        products=env.products,
+        mean_quantities=env.configuration.quantity_means,
+        buy_probs=buy_probs,
+        alphas=ts_alpha_prime,
+        one_campaign_per_product=True
+    )
+
+    optimizer.run_optimization()
+    current_allocation = optimizer.find_best_allocation()
+    print(current_allocation)
 
     # Compute Rewards from the environment
+    round_users, total_users = env.round(current_allocation)
 
     # Update the learners
-
-
+    rewards = np.zeros(n_campaigns)
+    for user in round_users:
+        if len(user.seen_product) > 0:
+            print(user.seen_product[0].number)
+            exit(1)
 
 if __name__ == '__main__':
     print("simulation done")

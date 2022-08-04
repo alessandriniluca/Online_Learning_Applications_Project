@@ -50,6 +50,8 @@ class Environment:
 
         # Compute alpha increments
 
+        # TODO sarebbe meglio avere una matrice 3x5 in caso di dati disaggregati invece di un
+        #      unico array di 15 elementi
         temp_budget = []
         if(len(budget) == 5):
             for i in range(len(self.configuration.average_users_number)):

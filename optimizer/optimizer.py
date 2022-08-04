@@ -51,6 +51,15 @@ class Optimizer:
         self.final_table = np.zeros((self.number_of_campaigns + 1, self.number_of_budgets_to_evaluate))
         self.partition = []
 
+    @property
+    def one_campaign_per_product(self):
+        return self._one_campaign_per_product
+
+    # one_campaign_per_product setter function
+    @one_campaign_per_product.setter
+    def one_campaign_per_product(self, new_value):
+        self._one_campaign_per_product = new_value
+
     def compute_rows(self):
         # for each possible budget allocation
         for budget_index in range(int(self.total_budget / self.resolution) + 1):
@@ -111,6 +120,10 @@ class Optimizer:
         for row in range(1, self.number_of_campaigns + 1):
             actual_row = self.rows_income_per_budget[row - 1]
             previous_row = self.final_table[row - 1]
+
+            # initialize prev and act to prevent compiler error
+            prev = -1
+            act = -1
 
             for i in range(0, len(actual_row)):
                 max_val = -1000
