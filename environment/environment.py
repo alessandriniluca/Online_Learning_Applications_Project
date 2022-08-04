@@ -53,7 +53,7 @@ class Environment:
         # TODO sarebbe meglio avere una matrice 3x5 in caso di dati disaggregati invece di un
         #      unico array di 15 elementi
         temp_budget = []
-        if(len(budget) == 5):
+        if len(budget) == 5:
             for i in range(len(self.configuration.average_users_number)):
                 budget_per_class = []
                 for j in range((len(budget))):
@@ -104,6 +104,7 @@ class Environment:
 
         # instantiate all users for this round
         this_round_users = []
+        this_round_profit = 0
         for class_index in range(len(users_per_category)):
             for start_product_index in range(len(users_per_category[class_index])):
                 for _ in range(users_per_category[class_index][start_product_index]):
@@ -144,6 +145,9 @@ class Environment:
                             qta = user.quantity_bought(prod)
                             user.add_bought_product(prod, qta)
 
+                            # Increase the current round profit
+                            this_round_profit += prod.price * qta
+
                             # if click on 1st secondary
                             if user.product_click(prod, prod.secondary_a):
                                 product_queue.append(prod.secondary_a)
@@ -159,4 +163,4 @@ class Environment:
         # update history
         self.users_per_round.append(this_round_users)
 
-        return this_round_users, sum(total_number_users)
+        return this_round_users, sum(total_number_users), this_round_profit

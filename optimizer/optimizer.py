@@ -122,8 +122,8 @@ class Optimizer:
             previous_row = self.final_table[row - 1]
 
             # initialize prev and act to prevent compiler error
-            prev = -1
-            act = -1
+            prev = None
+            act = None
 
             for i in range(0, len(actual_row)):
                 max_val = -1000
