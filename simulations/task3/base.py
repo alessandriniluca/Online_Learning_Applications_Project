@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib import pyplot as plt
 
 from bandits.gpts import GPTS_Learner
 from bandits.gpucb1 import GPUCB1_Learner
@@ -46,19 +47,22 @@ optimizer = FullOptimizer(
 )
 
 # Optimize 5 campaigns with all data known to compute the baseline
+print("=== OPTIMIZER STARTED ===")
 optimizer.one_campaign_per_product = True
 optimizer.run_optimization()
-best_allocation = optimizer.find_best_allocation()
+best_allocation, best_expected_profit = optimizer.find_best_allocation()
+print("=== THIS IS OPTIMAL ALLOCATION ===")
 print(best_allocation)
 
 # Start simulation estimating alpha functions
 
-TIME_HORIZON = 100
+TIME_HORIZON = 30
 N_EXPERIMENTS = 1
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
 budgets = np.linspace(0, sim_configuration["total_budget"], n_arms)
+profits = []
 
 for e in range(0, N_EXPERIMENTS):
     # Initialize a bandits to estimate alpha functions
@@ -87,7 +91,7 @@ for e in range(0, N_EXPERIMENTS):
         )
 
         optimizer.run_optimization()
-        current_allocation = optimizer.find_best_allocation()
+        current_allocation, expected_profit = optimizer.find_best_allocation()
         print(current_allocation)
 
         # Compute Rewards from the environment
@@ -123,8 +127,31 @@ for e in range(0, N_EXPERIMENTS):
 
         # update the learners
         gpts_learners.update(arm_indexes, rewards)
+        profits.append(round_profit)
 
     # TODO end of simulation, compare result and analyze regret vs clairvoyant
+    #      Note that best expected profit is just the average so it may be overtaken by sub optimal
+    #      allocation due to variance [We could cope with that considering also variance and take upperbound]
+    regrets = []
+    for profit in profits:
+        regrets.append(best_expected_profit - profit)
+
+    plt.figure(0)
+    plt.ylabel("Regret")
+    plt.xlabel("t")
+    plt.plot(regrets, 'r')
+
+    plt.legend(["REGRET"])
+    plt.show()
+
+    plt.figure(1)
+    plt.ylabel("Profit")
+    plt.xlabel("t")
+    plt.plot(profits, 'g')
+    plt.axhline(y=best_expected_profit, color='b', linestyle='-')
+
+    plt.legend(["PROFIT", "OPTIMAL AVG"])
+    plt.show()
 
 if __name__ == '__main__':
     print("simulation done")

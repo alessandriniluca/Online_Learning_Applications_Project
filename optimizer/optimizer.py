@@ -155,9 +155,11 @@ class Optimizer:
             final_budget[i] = budget_values[act]
             start = prv
 
-        print("Expected profit:", np.max(self.final_table[-1] - budget_values))
+        expected_profit = np.max(self.final_table[-1] - budget_values)
+
+        # print("Expected profit:", expected_profit)
         # print("Budget allocation:", final_budget)
-        return final_budget
+        return final_budget, expected_profit
 
     def run_optimization(self):
         self.reset()
