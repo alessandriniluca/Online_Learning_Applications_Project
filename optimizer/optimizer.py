@@ -147,6 +147,11 @@ class Optimizer:
             idx = i * self.number_of_budgets_to_evaluate + start
             act = self.partition[idx][1]
             prv = self.partition[idx][0]
+            if act is None:
+                # TODO needs to be further investigate...
+                raise ValueError("act is none")
+            if prv is None:
+                raise ValueError("prv is none")
             final_budget[i] = budget_values[act]
             start = prv
 

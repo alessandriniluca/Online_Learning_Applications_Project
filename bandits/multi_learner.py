@@ -26,7 +26,6 @@ class MultiLearner:
             alphas_prime[:, i, 0] = self.learners[i].get_expected_rewards()
         return alphas_prime
 
-
     def update(self, pulled_arms, rewards):
         """
         Args:
