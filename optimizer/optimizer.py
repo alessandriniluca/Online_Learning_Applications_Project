@@ -178,3 +178,11 @@ class Optimizer:
 
     def set_alphas(self, alphas):
         self.alphas = alphas
+
+    def set_buy_probabilities(self, buy_prob):
+        """Method needed to perform step 5 where buy probabilites change
+
+        Args:
+            buy_prob (matrix): estimated buy prob
+        """
+        self.buy_prob = buy_prob

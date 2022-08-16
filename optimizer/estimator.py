@@ -114,3 +114,11 @@ class Estimator:
                 class_result.append(g.get_results().tolist())
             result.append(class_result)
         return np.array(result)
+
+    def update_graph_clicks(self, graph_clicks):
+        """Method necessary for step 5, where graph weights are estimated online
+
+        Args:
+            graph_clicks (np.array): new estimateg graph clicks
+        """
+        self.graph_clicks = graph_clicks
