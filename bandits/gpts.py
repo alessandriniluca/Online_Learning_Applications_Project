@@ -49,6 +49,7 @@ class GPTS_Learner(Learner):
 
         # sigma lower bound
         self.sigmas = np.maximum(self.sigmas, 1e-2)
+        
 
     def update(self, pulled_arm, reward):
         """

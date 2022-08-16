@@ -46,8 +46,6 @@ class GraphWeightsEstimator():
                 if clicked:
                     self.graph[start_product][end_product]+=1
                 self.seen[start_product][end_product]+=1
-
-        print("GRAFOO", self.graph)
     
     def get_estimated_graph(self):
         """Return the estimation of graph weights

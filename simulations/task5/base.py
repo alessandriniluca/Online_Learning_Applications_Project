@@ -19,7 +19,7 @@ sim_configuration = load_static_sim_configuration("../../configurations/simulati
 alphas_functions = get_test_alphas_functions()
 
 ROUNDS = 90
-N_EXPERIMENTS = 1
+N_EXPERIMENTS = 3
 test_experiments = []
 
 env = EnvironmentCompleteHistory(
@@ -62,7 +62,7 @@ for experiment in range(N_EXPERIMENTS):
         #Optimize with probabilities calculated
         optimizer.one_campaign_per_product = True
         optimizer.run_optimization()
-        best_allocation = optimizer.find_best_allocation()
+        best_allocation, expected_earning = optimizer.find_best_allocation()
         # end of optimization
         # perform the round and get the history of the users
         users_history = env.round(best_allocation)
@@ -79,7 +79,7 @@ for experiment in range(N_EXPERIMENTS):
 
 print("\n\n\n")
 for i, e in enumerate(test_experiments):
-    logger.info("\n Experiment numebr " + str(i) + ". Results:\n" + str(e))
+    logger.info("\n Experiment numeber " + str(i) + ". Results:\n" + str(e))
 
 if __name__ == '__main__':
     logger.info("simulation done")

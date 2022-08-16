@@ -10,6 +10,7 @@ from environment.environment import Environment
 from optimizer.estimator import Estimator
 from optimizer.full_optimizer import FullOptimizer
 from optimizer.optimizer import Optimizer
+from probability_calculator.quantities_estimator import QuantitiesEstimator
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 
@@ -71,10 +72,12 @@ for e in range(0, N_EXPERIMENTS):
     #      gli esperimenti
     #gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
     gpts_learners = MultiLearner(n_arms, budgets, LearnerType.TS, n_learners=N_CAMPAIGNS)
+    quantities = QuantitiesEstimator(env.products)
 
     for t in range(TIME_HORIZON):
         # Ask for estimations (get alpha primes)
         ts_alpha_prime = gpts_learners.get_expected_rewards()
+
 
         # Run optimization
         optimizer = Optimizer(
@@ -84,12 +87,13 @@ for e in range(0, N_EXPERIMENTS):
             total_budget=sim_configuration["total_budget"],
             resolution=sim_configuration["resolution"],
             products=env.products,
-            mean_quantities=env.configuration.quantity_means,
+            mean_quantities=quantities.get_quantities(),
             buy_probs=buy_probs,
             alphas=ts_alpha_prime,
             one_campaign_per_product=True
         )
 
+        
         optimizer.run_optimization()
         current_allocation, expected_profit = optimizer.find_best_allocation()
         print(current_allocation)
@@ -127,6 +131,7 @@ for e in range(0, N_EXPERIMENTS):
 
         # update the learners
         gpts_learners.update(arm_indexes, rewards)
+        quantities.update_quantities(round_users)
         profits.append(round_profit)
 
     # TODO end of simulation, compare result and analyze regret vs clairvoyant
