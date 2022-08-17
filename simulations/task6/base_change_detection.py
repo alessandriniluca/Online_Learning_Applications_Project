@@ -70,7 +70,7 @@ for e in range(0, N_EXPERIMENTS):
     #      meglio fissare un seed per i generatori random così da poter riprodurre e confrontare
     #      gli esperimenti
     #gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
-    gpts_learners = MultiLearner(n_arms, budgets, LearnerType.TS, n_learners=N_CAMPAIGNS)
+    gpts_learners = MultiLearner(n_arms, budgets, LearnerType.UCB_CHANGE_DETECTION, n_learners=N_CAMPAIGNS)
 
     for t in range(TIME_HORIZON):
         # Ask for estimations (get alpha primes)
@@ -107,7 +107,7 @@ for e in range(0, N_EXPERIMENTS):
             # compute the rewards
             for reward_index, reward in enumerate(rewards):
                 # if the index match reward is 1
-                if reward_index == user.starting_product:
+                if reward_index == user.seen_product[0].number:
                     reward.append(1)
                 # otherwise zero
                 else:
@@ -126,8 +126,6 @@ for e in range(0, N_EXPERIMENTS):
             arm_indexes.append(np.where(budgets == allocation)[0][0])
 
         # update the learners
-        # print("INDICE::::", arm_indexes)
-        # print("Rewards:::", rewards)
         gpts_learners.update(arm_indexes, rewards)
         profits.append(round_profit)
 

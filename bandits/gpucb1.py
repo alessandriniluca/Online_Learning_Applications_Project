@@ -1,4 +1,5 @@
 from math import sqrt, log
+from random import shuffle
 
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor

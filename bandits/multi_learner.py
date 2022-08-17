@@ -1,4 +1,7 @@
+from bandits.GPUCB_sliding_window import GPUCBSlidingWindow
+from bandits.GPUCB_change_detection import GPUCBChangeDetection
 from bandits.gpucb1 import GPUCB1_Learner
+from bandits.learner import Learner
 from common.utils import LearnerType
 from bandits.gpts import GPTS_Learner
 import numpy as np
@@ -19,6 +22,11 @@ class MultiLearner:
                 self.learners.append(GPTS_Learner(n_arms, arms, "learner_" + str(i)))
             elif learner_type == LearnerType.UCB1:
                 self.learners.append(GPUCB1_Learner(n_arms, arms, "learner_" + str(i)))
+            elif learner_type == LearnerType.UCB_CHANGE_DETECTION:
+                self.learners.append(GPUCBChangeDetection(n_arms, arms, 20, 0.04, .2, "learner_" + str(i)))
+            elif learner_type == LearnerType.UCB_SLIDING_WINDOW:
+                self.learners.append(GPUCBSlidingWindow(n_arms, arms, 10, "learner_" + str(i)))
+
 
     def get_expected_rewards(self):
         alphas_prime = np.zeros((self.n_arms, self.n_learners, 1))

@@ -4,6 +4,7 @@ from common.utils import get_logger, get_products
 from environment.product import Product
 from environment.user import User
 import numpy as np
+import random
 
 logger = get_logger(__name__)
 
@@ -162,5 +163,6 @@ class Environment:
 
         # update history
         self.users_per_round.append(this_round_users)
+        random.shuffle(this_round_users)
 
         return this_round_users, sum(total_number_users), this_round_profit

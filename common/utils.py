@@ -137,3 +137,5 @@ class LearnerType(enum.Enum):
 
     TS = enum.auto()
     UCB1 = enum.auto()
+    UCB_CHANGE_DETECTION = enum.auto()
+    UCB_SLIDING_WINDOW = enum.auto()
