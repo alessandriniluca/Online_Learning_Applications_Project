@@ -4,7 +4,6 @@ from matplotlib import pyplot as plt
 from bandits.gpts import GPTS_Learner
 from bandits.gpucb1 import GPUCB1_Learner
 from bandits.multi_learner import MultiLearner
-from change_detection.alpha_function_generator import AlphaFunctionGenerator
 from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions, \
     LearnerType
 from environment.environment import Environment
@@ -33,13 +32,33 @@ estimator = Estimator(env.configuration.graph_clicks,
 
 buy_probs = estimator.get_buy_probs()
 
+optimizer = FullOptimizer(
+    users_number=env.configuration.average_users_number,
+    min_budget=sim_configuration["min_budget"],
+    max_budget=sim_configuration["max_budget"],
+    total_budget=sim_configuration["total_budget"],
+    resolution=sim_configuration["resolution"],
+    products=env.products,
+    mean_quantities=env.configuration.quantity_means,
+    buy_probs=buy_probs,
+    basic_alphas=env.configuration.basic_alphas,
+    alphas_functions=alphas_functions,
+    one_campaign_per_product=True
+)
 
-TIME_HORIZON = 60
-N_EXPERIMENTS = 3
+# Optimize 5 campaigns with all data known to compute the baseline
+print("=== OPTIMIZER STARTED ===")
+optimizer.one_campaign_per_product = True
+optimizer.run_optimization()
+best_allocation, best_expected_profit = optimizer.find_best_allocation()
+print("=== THIS IS OPTIMAL ALLOCATION ===")
+print(best_allocation)
+
+# Start simulation estimating alpha functions
+
+TIME_HORIZON = 45
+N_EXPERIMENTS = 100
 N_CAMPAIGNS = 5
-CHANGE_FUNCTION_PERIOD = 30
-
-
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
 budgets = np.linspace(0, sim_configuration["total_budget"], n_arms)
@@ -48,57 +67,21 @@ mean_profit = []
 mean_regret = []
 
 
-
 for e in range(0, N_EXPERIMENTS):
-    best_expected_profits = []
-    best_allocation_res = []
     # Initialize a bandits to estimate alpha functions
     # TODO forse meglio gestire due simulazioni differenti, una per TS e una per UCB
     #      meglio fissare un seed per i generatori random così da poter riprodurre e confrontare
     #      gli esperimenti
     #gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
-    gpts_learners = MultiLearner(n_arms, budgets, LearnerType.UCB_SLIDING_WINDOW, n_learners=N_CAMPAIGNS)
+    gpts_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
 
     env = Environment(
         configuration=env_configuration,
         alphas_functions=alphas_functions
     )
     profits = []
-    season = 0
-
-    function_generator = AlphaFunctionGenerator()
 
     for t in range(TIME_HORIZON):
-
-        if t == 0 or t == 30:
-
-            env.alphas_functions = function_generator.get_functions(season)
-            season += 1
-
-            optimizer = FullOptimizer(
-                users_number=env.configuration.average_users_number,
-                min_budget=sim_configuration["min_budget"],
-                max_budget=sim_configuration["max_budget"],
-                total_budget=sim_configuration["total_budget"],
-                resolution=sim_configuration["resolution"],
-                products=env.products,
-                mean_quantities=env.configuration.quantity_means,
-                buy_probs=buy_probs,
-                basic_alphas=env.configuration.basic_alphas,
-                alphas_functions=env.alphas_functions,
-                one_campaign_per_product=True
-            )
-
-            # Optimize 5 campaigns with all data known to compute the baseline
-            print("=== OPTIMIZER STARTED ===")
-            optimizer.one_campaign_per_product = True
-            optimizer.run_optimization()
-            best_allocation, best_expected_profit = optimizer.find_best_allocation()
-            print("=== THIS IS OPTIMAL ALLOCATION ===")
-            print(best_allocation)
-            best_allocation_res.append(best_allocation)
-
-        best_expected_profits.append(best_expected_profit)
         
         # Ask for estimations (get alpha primes)
         ts_alpha_prime = gpts_learners.get_expected_rewards()
@@ -162,16 +145,15 @@ for e in range(0, N_EXPERIMENTS):
     #      Note that best expected profit is just the average so it may be overtaken by sub optimal
     #      allocation due to variance [We could cope with that considering also variance and take upperbound]
     regrets = []
-
-    for i in range(len(profits)):
-        regrets.append(best_expected_profits[i] - profits[i])
+    for profit in profits:
+        regrets.append(best_expected_profit - profit)
 
     mean_profit.append(profits)
     mean_regret.append(regrets)
 
 # print("REG:", mean_regret)
 # print("PROF:", mean_profit)
-print(best_allocation_res)
+
 
 plt.figure(0)
 plt.ylabel("Regret")
@@ -185,9 +167,7 @@ plt.figure(1)
 plt.ylabel("Profit")
 plt.xlabel("t")
 plt.plot(np.mean(mean_profit, axis=0), 'g')
-# plt.axhline(y=best_expected_profit, color='b', linestyle='-')
-plt.plot(best_expected_profits, 'b')
-
+plt.axhline(y=best_expected_profit, color='b', linestyle='-')
 
 plt.legend(["PROFIT", "OPTIMAL AVG"])
 plt.show()

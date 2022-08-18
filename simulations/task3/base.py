@@ -56,13 +56,16 @@ print(best_allocation)
 
 # Start simulation estimating alpha functions
 
-TIME_HORIZON = 30
-N_EXPERIMENTS = 1
+TIME_HORIZON = 45
+N_EXPERIMENTS = 100
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
 budgets = np.linspace(0, sim_configuration["total_budget"], n_arms)
-profits = []
+
+mean_profit = []
+mean_regret = []
+
 
 for e in range(0, N_EXPERIMENTS):
     # Initialize a bandits to estimate alpha functions
@@ -72,7 +75,14 @@ for e in range(0, N_EXPERIMENTS):
     #gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
     gpts_learners = MultiLearner(n_arms, budgets, LearnerType.TS, n_learners=N_CAMPAIGNS)
 
+    env = Environment(
+        configuration=env_configuration,
+        alphas_functions=alphas_functions
+    )
+    profits = []
+
     for t in range(TIME_HORIZON):
+        
         # Ask for estimations (get alpha primes)
         ts_alpha_prime = gpts_learners.get_expected_rewards()
 
@@ -138,22 +148,29 @@ for e in range(0, N_EXPERIMENTS):
     for profit in profits:
         regrets.append(best_expected_profit - profit)
 
-    plt.figure(0)
-    plt.ylabel("Regret")
-    plt.xlabel("t")
-    plt.plot(regrets, 'r')
+    mean_profit.append(profits)
+    mean_regret.append(regrets)
 
-    plt.legend(["REGRET"])
-    plt.show()
+# print("REG:", mean_regret)
+# print("PROF:", mean_profit)
 
-    plt.figure(1)
-    plt.ylabel("Profit")
-    plt.xlabel("t")
-    plt.plot(profits, 'g')
-    plt.axhline(y=best_expected_profit, color='b', linestyle='-')
 
-    plt.legend(["PROFIT", "OPTIMAL AVG"])
-    plt.show()
+plt.figure(0)
+plt.ylabel("Regret")
+plt.xlabel("t")
+plt.plot(np.mean(mean_regret, axis=0), 'r')
+
+plt.legend(["REGRET"])
+plt.show()
+
+plt.figure(1)
+plt.ylabel("Profit")
+plt.xlabel("t")
+plt.plot(np.mean(mean_profit, axis=0), 'g')
+plt.axhline(y=best_expected_profit, color='b', linestyle='-')
+
+plt.legend(["PROFIT", "OPTIMAL AVG"])
+plt.show()
 
 if __name__ == '__main__':
     print("simulation done")

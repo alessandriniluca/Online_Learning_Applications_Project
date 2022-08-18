@@ -9,12 +9,9 @@ class GPUCBChangeDetection(GPUCB1_Learner):
     super().__init__(n_arms, arms, name)
     self.change_detection = ChangeDetection(n_arms, M, eps, h)
     self.valid_rewards = [[] for arm in range(n_arms)]
-    self.this_round_rewards = []
-    self.this_round_arm_idx = -1
 
   def update_observations(self, arm_idx, reward):
     self.this_round_rewards.append(reward)
-    self.this_round_arm_idx = arm_idx
 
 
   def update_model(self):
@@ -26,9 +23,6 @@ class GPUCBChangeDetection(GPUCB1_Learner):
         self.valid_rewards[self.this_round_arm_idx] = []
     else:
         self.valid_rewards[self.this_round_arm_idx] += self.this_round_rewards
-
-    self.this_round_rewards = []
-    self.this_round_arm_idx = -1
 
     arms_list = []
     rewards = []
@@ -49,5 +43,16 @@ class GPUCBChangeDetection(GPUCB1_Learner):
     # sigma lower bound
     self.sigmas = np.maximum(self.sigmas, 1e-2)
 
+  def update(self, pulled_arm, reward):
+    """
+      This method update the GP state and internal model
+    """
+    self.t += 1
 
+    self.this_round_rewards = []
+    self.this_round_arm_idx = pulled_arm
+
+    for r in reward:
+      self.update_observations(pulled_arm, r)
+    self.update_model()
   

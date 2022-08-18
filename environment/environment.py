@@ -69,11 +69,13 @@ class Environment:
 
         budget = temp_budget
 
+
         delta_increment = []
         for i, function in enumerate(self.alphas_functions):
             delta_increment.append(np.concatenate((function(budget[i]), np.array([0]))))
 
         logger.debug("Delta increments: " + str(delta_increment))
+
 
         # Compute new weights
         new_weights = self.configuration.basic_alphas + np.array(delta_increment)
@@ -84,12 +86,12 @@ class Environment:
             if sum(delta_increment[class_index]) > new_weights[class_index][5]:
                 raise ValueError("Delta increment exceeding alpha zero weights")
             new_weights[class_index][5] -= sum(delta_increment[class_index])
-
+        
         # Sample alphas for this round from dirichlet distributions
         actual_alpha = np.array([])
         for i in range(len(new_weights)):
             actual_alpha = np.concatenate(
-                (actual_alpha, np.random.dirichlet(20 * new_weights[i] / sum(new_weights[i]))), axis=0)
+                (actual_alpha, np.random.dirichlet(new_weights[i])), axis=0)
         actual_alpha = actual_alpha.reshape(3, 6)
 
         logger.debug("Alpha ratios: " + str(actual_alpha))

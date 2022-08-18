@@ -16,7 +16,7 @@ class GPTS_Learner(Learner):
         self.sigmas = np.ones(self.n_arms) * 8
         self.pulled_arms = []
         alpha = 1.0
-        kernel = C(1, constant_value_bounds="fixed") * RBF(1, length_scale_bounds="fixed")
+        kernel = C(1, constant_value_bounds="fixed") * RBF(2, length_scale_bounds="fixed")
         # kernel = 1 * RBF(length_scale=2.0, length_scale_bounds=(1e-2, 1e2))
         self.gp = GaussianProcessRegressor(
             kernel=kernel,
@@ -65,4 +65,6 @@ class GPTS_Learner(Learner):
         Return expected rewards that will be provided to an optimizer to complete the combinatorial Bandit
         """
         sampled_values = np.random.normal(self.means, self.sigmas)
+        for i in range(len(sampled_values)):
+            sampled_values[i] = min(max(sampled_values[i], 0.0), 1.0)
         return sampled_values

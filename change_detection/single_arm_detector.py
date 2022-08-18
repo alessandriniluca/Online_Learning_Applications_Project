@@ -22,7 +22,7 @@ class SingleArmDetector:
     self.t = 0
 
   def update(self, sample):
-    print("REFERENCE: ", self.reference)
+    
 
 
     self.t += 1
@@ -31,6 +31,7 @@ class SingleArmDetector:
       self.reference += sample/self.M
       return False
     else:
+      self.reference = (self.reference*(self.t-1) + sample)/self.t
       s_plus = (sample - self.reference) - self.eps
       s_minus = -(sample - self.reference) - self.eps
 
@@ -38,6 +39,7 @@ class SingleArmDetector:
       self.g_minus = max(0, self.g_minus + s_minus)
 
       if self.g_minus > self.h or self.g_plus > self.h:
+        print("REFERENCE: ", self.reference, "Sample:", sample)
         self.reset()
         return True
       return False

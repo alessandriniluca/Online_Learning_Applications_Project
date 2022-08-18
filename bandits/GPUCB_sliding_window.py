@@ -11,8 +11,10 @@ class GPUCBSlidingWindow(GPUCB1_Learner):
     self.n_arms = n_arms
 
 
+
   def update_observations(self, arm_idx, reward):
-    self.valid_rewards[len(self.valid_rewards)-1][arm_idx].append(reward)
+    self.valid_rewards.append( (arm_idx, reward) )
+    # print(self.valid_rewards)
 
 
   def update_model(self):
@@ -22,11 +24,14 @@ class GPUCBSlidingWindow(GPUCB1_Learner):
 
     arms_list = []
     rewards = []
+
     for day in self.valid_rewards:
-      for arm_idx, single_arm_rewards in enumerate(day):
-        for reward in single_arm_rewards:
-          arms_list.append(self.arms[arm_idx])
-          rewards.append(reward)
+      arm_idx = day[0]
+      rewards_list = day[1]
+
+      for reward in rewards_list:
+        arms_list.append(self.arms[arm_idx])
+        rewards.append(reward)
 
     x = np.atleast_2d(arms_list).T 
     y = np.array(rewards)
@@ -43,14 +48,11 @@ class GPUCBSlidingWindow(GPUCB1_Learner):
 
   def update(self, pulled_arm, reward):
     self.t += 1
-    self.valid_rewards.append([[] for _ in range(self.n_arms)])
-    for r in reward:
-        self.update_observations(pulled_arm, r)
+    self.update_observations(pulled_arm, reward)
     self.time_elapsed += 1
 
     if self.time_elapsed > self.window_size:
       self.valid_rewards = self.valid_rewards[1:]
-      self.time_elapsed = 0
 
     self.update_model()
 

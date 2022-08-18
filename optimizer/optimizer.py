@@ -122,11 +122,12 @@ class Optimizer:
             previous_row = self.final_table[row - 1]
 
             # initialize prev and act to prevent compiler error
+
             prev = None
             act = None
 
             for i in range(0, len(actual_row)):
-                max_val = -1000
+                max_val = -np.inf
                 for j in range(0, i + 1):
                     if actual_row[i - j] + previous_row[j] > max_val:
                         max_val = actual_row[i - j] + previous_row[j]
