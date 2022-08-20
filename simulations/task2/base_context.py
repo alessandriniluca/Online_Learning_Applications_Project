@@ -3,8 +3,7 @@ import numpy as np
 from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions
 from environment.environment import Environment
 from optimizer.estimator import Estimator
-from optimizer.full_optimizer import FullOptimizer
-from optimizer.optimizer import Optimizer
+from optimizer.full_optimizer_context import FullOptimizer
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 
@@ -37,17 +36,11 @@ optimizer = FullOptimizer(
     mean_quantities=env.configuration.quantity_means,
     buy_probs=buy_probs,
     basic_alphas=env.configuration.basic_alphas,
-    alphas_functions=alphas_functions
+    alphas_functions=alphas_functions,
+    features_division = [[0], [1], [2, 3]]
 )
 
 # Optimize 15 campaigns
-optimizer.one_campaign_per_product = False
-optimizer.run_optimization()
-best_allocation = optimizer.find_best_allocation()
-print(best_allocation)
-
-# Optimize 5 campaigns
-optimizer.one_campaign_per_product = True
 optimizer.run_optimization()
 best_allocation = optimizer.find_best_allocation()
 print(best_allocation)

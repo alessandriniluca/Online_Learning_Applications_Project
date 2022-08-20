@@ -1,7 +1,7 @@
 import numpy as np
 
 from common.utils import load_static_env_configuration, get_test_alphas_functions
-from environment.environment import Environment
+from environment.environment_context import Environment
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 
@@ -13,7 +13,7 @@ test_env = Environment(
     alphas_functions=alphas_functions
 )
 
-test_env.round([10, 100, 100, 100, 100])
+test_env.round([100, 10, 10, 100, 10, 10, 10, 0, 0, 0], [[0, 1], [2, 3]])
 
 print(test_env.alphas_functions[0]([100,0,0,0,0]))
 
