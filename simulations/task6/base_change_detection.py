@@ -34,7 +34,7 @@ estimator = Estimator(env.configuration.graph_clicks,
 buy_probs = estimator.get_buy_probs()
 
 
-TIME_HORIZON = 45
+TIME_HORIZON = 65
 N_EXPERIMENTS = 10
 N_CAMPAIGNS = 5
 CHANGE_FUNCTION_PERIOD = 30
@@ -70,7 +70,7 @@ for e in range(0, N_EXPERIMENTS):
 
     for t in range(TIME_HORIZON):
 
-        if t == 0 or t == 10:
+        if t == 0 or t == 20 or t == 50:
 
             env.alphas_functions = function_generator.get_functions(season)
             season += 1

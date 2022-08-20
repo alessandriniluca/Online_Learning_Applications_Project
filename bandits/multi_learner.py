@@ -23,7 +23,7 @@ class MultiLearner:
             elif learner_type == LearnerType.UCB1:
                 self.learners.append(GPUCB1_Learner(n_arms, arms, "learner_" + str(i)))
             elif learner_type == LearnerType.UCB_CHANGE_DETECTION:
-                self.learners.append(GPUCBChangeDetection(n_arms, arms, 5, 0.005, .008, "learner_" + str(i)))
+                self.learners.append(GPUCBChangeDetection(n_arms, arms, 8, 0.005, .04, "learner_" + str(i)))
             elif learner_type == LearnerType.UCB_SLIDING_WINDOW:
                 self.learners.append(GPUCBSlidingWindow(n_arms, arms, 10, "learner_" + str(i)))
 
