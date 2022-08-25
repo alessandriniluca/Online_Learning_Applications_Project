@@ -130,6 +130,22 @@ def get_prices(products):
     return prices
 
 
+def translate_feature_group(division):
+    result = []
+    for features in division:
+        res = []
+        for f in features:
+            if f == (0,0):
+                res.append(0)
+            elif f == (0,1):
+                res.append(1)
+            elif f == (1,0):
+                res.append(2)
+            elif f == (1,1):
+                res.append(3)
+        result.append(res)
+    return result
+
 class LearnerType(enum.Enum):
     """
     Learner types

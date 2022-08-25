@@ -73,7 +73,7 @@ class Optimizer:
 
 
                 # compute expected income
-                print("FEATURE ORA: ", self.features_division[current_division_feature])
+                # print("FEATURE ORA: ", self.features_division[current_division_feature])
                 for feature in self.features_division[current_division_feature]:
                     expected_income_per_user = 0
                     if feature > 2:
@@ -93,13 +93,13 @@ class Optimizer:
                         expected_income_per_user += expected_income_per_product * self.mean_quantities[current_division_feature][
                             arrival_prod]
 
-                        print("EXp:", expected_income_per_user, "counter:", current_division_feature)
+                        # print("EXp:", expected_income_per_user, "counter:", current_division_feature)
+                    # print("alpha:", self.alphas[budget_index][starting_prod][current_division_feature], "users:", self.users_number[current_class] , "income", expected_income_per_user)
 
-                    print("UTENTI:", self.users_number[current_class])
+                    # print("UTENTI:", self.users_number[current_class])
                     self.rows_income_per_budget[campaign][budget_index] += (
                         self.alphas[budget_index][starting_prod][current_division_feature] * self.users_number[current_class]) * expected_income_per_user
-                    print("alpha:", self.alphas[budget_index][starting_prod][current_division_feature], "users:", self.users_number[current_class] , "income", expected_income_per_user)
-                    print("------------- IDX:", current_division_feature, "FEATURE", feature, "PP", self.rows_income_per_budget[campaign][budget_index])
+                    # print("------------- IDX:", current_division_feature, "FEATURE", feature, "PP", self.rows_income_per_budget[campaign][budget_index])
 
     def compute_rows_aggregate_campaigns(self):
         # for each user class
@@ -185,7 +185,7 @@ class Optimizer:
             self.compute_rows_aggregate_campaigns()
         else:
             self.compute_rows()
-            print(self.rows_income_per_budget)
+            #print(self.rows_income_per_budget)
         self.build_final_table()
 
     def reset(self):

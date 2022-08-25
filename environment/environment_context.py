@@ -113,6 +113,9 @@ class Environment:
 
         # Apply alpha ratios to all users
         users_per_category = (actual_alpha * n_users[:, np.newaxis]).astype(int)
+
+        dato_disass = users_per_category.copy()
+
         total_number_users = sum(users_per_category)
         logger.debug("Users per category " + str(users_per_category))
         logger.debug("Sum: " + str(sum(total_number_users)))
@@ -136,8 +139,8 @@ class Environment:
                         user_class=class_index,
                         # Note that we will have an effective split on feature 0
                         # The split of feature 1 instead will be performed only after seeing feature 0 == 0
-                        features=[0, 0] if class_index == 0 else (
-                            [0, 1] if class_index == 1 else ([1, 1] if np.random.uniform(0, 1) < 0.5 else [1, 0])),
+                        features=(0, 0) if class_index == 0 else (
+                            (0, 1) if class_index == 1 else ((1, 1) if np.random.uniform(0, 1) < 0.5 else (1, 0))),
                         starting_product=start_product_index,
                         # Make a copy of the graph for each user, since exploration will change graph probabilities
                         graph_clicks=self.configuration.graph_clicks.copy()
@@ -182,4 +185,18 @@ class Environment:
         self.users_per_round.append(this_round_users)
         random.shuffle(this_round_users)
 
-        return this_round_users, sum(total_number_users), this_round_profit
+
+        uno_zero = 0
+        uno_uno = 0
+        for user in this_round_users:
+            if user.features == (1,0):
+                uno_zero += 1
+            elif user.features == (1,1):
+                uno_uno += 1
+
+
+        if uno_zero == 0 and uno_uno == 0:
+            uno_zero = 1
+            uno_uno = 1
+
+        return this_round_users, dato_disass[0][5], dato_disass[1][5], int(uno_zero/(uno_zero+uno_uno)*dato_disass[2][5]), int(uno_uno/(uno_zero+uno_uno)*dato_disass[2][5]), this_round_profit

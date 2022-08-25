@@ -40,5 +40,10 @@ class MultiLearner:
             pulled_arms (list): list of the arms pulled (5 elements in aggregate case, 15 otherwise)
             rewards (list of lists): the i-th sub-list will contain the rewards for bandit i
         """
+        # print("_-----------_")
+        # print(rewards)
+        # print(len(self.learners))
+        # print("PULLED ARM:", pulled_arms)
         for i, arm in enumerate(pulled_arms):
-            self.learners[i].update(arm, rewards[i])
+            if arm >= 0:
+                self.learners[i].update(arm, rewards[i])
