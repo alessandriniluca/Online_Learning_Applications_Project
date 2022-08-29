@@ -52,12 +52,12 @@ optimizer.one_campaign_per_product = False
 optimizer.run_optimization()
 best_allocation, best_expected_profit = optimizer.find_best_allocation()
 print("=== THIS IS OPTIMAL ALLOCATION ===")
-print(best_allocation)
+print(best_allocation, best_expected_profit)
 
 # Start simulation estimating alpha functions
 
 TIME_HORIZON = 35
-N_EXPERIMENTS = 70
+N_EXPERIMENTS = 10
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1

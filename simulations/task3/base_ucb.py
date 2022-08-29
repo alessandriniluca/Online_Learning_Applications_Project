@@ -52,7 +52,7 @@ optimizer.one_campaign_per_product = True
 optimizer.run_optimization()
 best_allocation, best_expected_profit = optimizer.find_best_allocation()
 print("=== THIS IS OPTIMAL ALLOCATION ===")
-print(best_allocation)
+print(best_allocation, best_expected_profit)
 
 # Start simulation estimating alpha functions
 

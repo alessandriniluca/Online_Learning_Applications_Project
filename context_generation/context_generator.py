@@ -18,6 +18,7 @@ class ContextGenerator:
         self.arms = arms
         self.learner_type = learner_type
         self.splitted_features = []
+        self.average_users_per_feature = [45, 45, 22, 22]
         self.n_learners=5
         self.quantity_estimator = QuantitiesEstimatorByFeatures(5, 4)
 
@@ -38,8 +39,20 @@ class ContextGenerator:
     def add_reward(self, product_number, arm_idx, user_feature, reward):
         feature1 = user_feature[0]
         feature2 = user_feature[1]
+        a = None
+        for s in self.splitted_features:
+            if (feature1, feature2) in s:
+                a = self.arms[arm_idx]/self.get_users_in_context(s) * self.get_users_in_context(user_feature)
+                a = int(a/5)
         self.rewards_per_feature[arm_idx][product_number][feature1][feature2].append(reward)
 
+    def get_users_in_context(self, feature_list):
+        tot = 0
+        for feature in self.translate_features(feature_list):
+            tot += self.average_users_per_feature[feature]
+        return tot
+
+        
     
     def split(self):
         tot = 0

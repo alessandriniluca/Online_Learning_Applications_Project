@@ -107,7 +107,7 @@ def alphas_function_class_0(budget):
 
 
 def alphas_function_class_1(budget):
-    increment = [(25.0 * (1.0 - np.exp(-0.043 * (budget[0])))).astype(int),
+    increment = [(15.0 * (1.0 - np.exp(-0.043 * (budget[0])))).astype(int),
                  (15.0 * (1.0 - np.exp(-0.039 * (budget[1])))).astype(int),
                  (10.0 * (1.0 - np.exp(-0.045 * (budget[2])))).astype(int),
                  (10.0 * (1.0 - np.exp(-0.03 * (budget[3])))).astype(int),
@@ -117,7 +117,7 @@ def alphas_function_class_1(budget):
 
 
 def alphas_function_class_2(budget):
-    increment = [(30.0 * (1.0 - np.exp(-0.038 * (budget[0])))).astype(int),
+    increment = [(15.0 * (1.0 - np.exp(-0.038 * (budget[0])))).astype(int),
                  (10.0 * (1.0 - np.exp(-0.045 * (budget[1])))).astype(int),
                  (50.0 * (1.0 - np.exp(-0.045 * (budget[2])))).astype(int),
                  (15.0 * (1.0 - np.exp(-0.044 * (budget[3])))).astype(int),
