@@ -2,7 +2,13 @@ import enum
 import logging
 from os.path import exists
 import json
+from unicodedata import name
 import numpy as np
+
+# using time module
+import time
+from datetime import datetime
+
 
 from environment.configuration import Configuration
 from environment.product import Product
@@ -155,3 +161,14 @@ class LearnerType(enum.Enum):
     UCB1 = enum.auto()
     UCB_CHANGE_DETECTION = enum.auto()
     UCB_SLIDING_WINDOW = enum.auto()
+
+def save_data(task_name, values):
+    # ts stores the time in seconds
+    ts = time.time()
+    ts = datetime.fromtimestamp(ts)
+
+    file_name = "../../results/result_"+str(task_name)+"_"+str(ts)+".txt"
+    with open(file_name, 'w') as f:
+        for value in values:
+            f.write(str(value))
+            f.write("\n")

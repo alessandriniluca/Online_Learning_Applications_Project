@@ -5,7 +5,7 @@ from bandits.gpts import GPTS_Learner
 from bandits.gpucb1 import GPUCB1_Learner
 from bandits.multi_learner import MultiLearner
 from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions, \
-    LearnerType
+    LearnerType, save_data
 from environment.environment import Environment
 from optimizer.estimator import Estimator
 from optimizer.full_optimizer import FullOptimizer
@@ -56,8 +56,8 @@ print(best_allocation)
 
 # Start simulation estimating alpha functions
 
-TIME_HORIZON = 45
-N_EXPERIMENTS = 100
+TIME_HORIZON = 35
+N_EXPERIMENTS = 600
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
@@ -154,6 +154,14 @@ for e in range(0, N_EXPERIMENTS):
 # print("REG:", mean_regret)
 # print("PROF:", mean_profit)
 
+save_data("task3_ts",
+    [
+    "experiments: "+str(N_EXPERIMENTS),
+    "rounds: "+str(TIME_HORIZON),
+    "regret", list(np.mean(mean_regret, axis=0)), 
+    "profit", list(np.mean(mean_profit, axis=0)),
+    "std_dev", list(np.std(mean_profit, axis=0))]
+    )
 
 plt.figure(0)
 plt.ylabel("Regret")
@@ -168,6 +176,11 @@ plt.ylabel("Profit")
 plt.xlabel("t")
 plt.plot(np.mean(mean_profit, axis=0), 'g')
 plt.axhline(y=best_expected_profit, color='b', linestyle='-')
+
+x = np.linspace(0, TIME_HORIZON-1, TIME_HORIZON)
+
+plt.fill_between(x, np.mean(mean_profit, axis=0) - np.std(mean_profit, axis=0), np.mean(mean_profit, axis=0) + np.std(mean_profit, axis=0), color='C0', alpha=0.2)
+
 
 plt.legend(["PROFIT", "OPTIMAL AVG"])
 plt.show()

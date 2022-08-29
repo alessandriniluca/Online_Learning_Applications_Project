@@ -63,6 +63,7 @@ class ContextGenerator:
         second_feature_2 = self.get_alphas_by_feature([(0,1), (1,1)])
         reward_second_feature = self.optimize(second_feature_1, [(0,0), (1,0)]) + self.optimize(second_feature_2, [(0,1), (1,1)])
 
+        print("------ reward no split", reward_no_split, "Reward first feature", reward_first_feature, "Reward second feature", reward_second_feature)
         if reward_no_split > reward_first_feature and reward_no_split > reward_second_feature:
             context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (0,1), (1,0), (1,1)])
             self.active_contexts.append(context)
@@ -77,7 +78,10 @@ class ContextGenerator:
             set2 = self.get_alphas_by_feature([(0,1)])
             splitted_reward = self.optimize(set1, [(0,0)]) + self.optimize(set2, [(0,1)])
 
-            if aggregate_1 > splitted_reward:
+            print("------1st aggregate_1", aggregate_1, "splitted_reward", splitted_reward)
+
+            
+            if aggregate_1 < splitted_reward:
                 # split primo dei due gruppi
                 context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0)])
                 self.active_contexts.append(context)
@@ -96,7 +100,9 @@ class ContextGenerator:
             set2 = self.get_alphas_by_feature([(1,1)])
             splitted_reward = self.optimize(set1, [(1,0)]) + self.optimize(set2, [(1,1)])
 
-            if aggregate_2 > splitted_reward:
+            print("------1st aggregate_2", aggregate_2, "splitted_reward", splitted_reward)
+
+            if aggregate_2 < splitted_reward:
                 context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0)])
                 self.active_contexts.append(context)
                 context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,1)])
@@ -116,8 +122,9 @@ class ContextGenerator:
             set1 = self.get_alphas_by_feature([(0,0)])
             set2 = self.get_alphas_by_feature([(1,0)])
             splitted_reward = self.optimize(set1, [(0,0)]) + self.optimize(set2, [(1,0)])
+            print("------2nd aggregate_1", aggregate_1, "splitted_reward", splitted_reward)
 
-            if aggregate_1 > splitted_reward:
+            if aggregate_1 < splitted_reward:
                 # split primo dei due gruppi
                 context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0)])
                 self.active_contexts.append(context)
@@ -131,12 +138,13 @@ class ContextGenerator:
                 self.splitted_features.append([(0,0),(1,0)])
 
             aggregate_2 = self.optimize(second_feature_2, [(0,1), (1,1)])
-            
+
             set1 = self.get_alphas_by_feature([(0,1)])
             set2 = self.get_alphas_by_feature([(1,1)])
             splitted_reward = self.optimize(set1, [(0,1)]) + self.optimize(set2, [(1,1)])
+            print("------2nd aggregate_2", aggregate_2, "splitted_reward", splitted_reward)
 
-            if aggregate_1 > splitted_reward:
+            if aggregate_2 < splitted_reward:
                 # split primo dei due gruppi
                 context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1)])
                 self.active_contexts.append(context)
@@ -158,9 +166,9 @@ class ContextGenerator:
         alphas_functions = get_test_alphas_functions()
 
         env = Environment(
-        configuration=env_configuration,
-        alphas_functions=alphas_functions
-    )
+            configuration=env_configuration,
+            alphas_functions=alphas_functions
+        )
     
         estimator = Estimator(env.configuration.graph_clicks,
                         env.products,
@@ -171,9 +179,28 @@ class ContextGenerator:
 
         buy_probs = estimator.get_buy_probs()
 
+        class_features = self.translate_features(features)
+        user_number_per_feature = env.average_users_per_feature
+
+        users_to_divide = 0
+        total_users_in_context = 0
+
+        for i, users_number in enumerate(user_number_per_feature):
+            if i not in class_features:
+                users_to_divide += users_number
+            elif i in class_features:
+                total_users_in_context += users_number
+
+        users = [0, 0, 0, 0]
+        for i, users_number in enumerate(user_number_per_feature):
+            if i in class_features:
+                users[i] = users_number + int(users_to_divide/total_users_in_context*users_number)
+            
+
+
         # print("TRADUZIONE", self.translate_features(features))
         optimizer = Optimizer(
-            users_number=env.configuration.average_users_number,
+            users_number=users,
             min_budget=sim_configuration["min_budget"],
             max_budget=sim_configuration["max_budget"],
             total_budget=sim_configuration["total_budget"],
@@ -189,7 +216,7 @@ class ContextGenerator:
 
         optimizer.run_optimization()
         current_allocation, expected_profit = optimizer.find_best_allocation()
-        return expected_profit
+        return expected_profit * total_users_in_context / (total_users_in_context + users_to_divide)
 
 
     def update(self, pulled_arms, rewards, user_features):
@@ -221,7 +248,7 @@ class ContextGenerator:
                 for k in features:      
                     tot += self.rewards_per_feature[i][j][k[0]][k[1]]
                 # print(".---------media:", tot,  self.compute_mean(tot), "lb:", self.lower_bound(0.95, len(tot)))
-                alphas[i][j][0] = self.compute_mean(tot) - self.lower_bound(0.95, len(tot))
+                alphas[i][j][0] = self.compute_mean(tot) - self.lower_bound(0.99, len(tot))
 
         return alphas
 

@@ -114,7 +114,7 @@ class Environment:
         # Apply alpha ratios to all users
         users_per_category = (actual_alpha * n_users[:, np.newaxis]).astype(int)
 
-        dato_disass = users_per_category.copy()
+        users_per_category_copy = users_per_category.copy()
 
         total_number_users = sum(users_per_category)
         logger.debug("Users per category " + str(users_per_category))
@@ -186,17 +186,17 @@ class Environment:
         random.shuffle(this_round_users)
 
 
-        uno_zero = 0
-        uno_uno = 0
-        for user in this_round_users:
-            if user.features == (1,0):
-                uno_zero += 1
-            elif user.features == (1,1):
-                uno_uno += 1
+        # uno_zero = 0
+        # uno_uno = 0
+        # for user in this_round_users:
+        #     if user.features == (1,0):
+        #         uno_zero += 1
+        #     elif user.features == (1,1):
+        #         uno_uno += 1
 
 
-        if uno_zero == 0 and uno_uno == 0:
-            uno_zero = 1
-            uno_uno = 1
+        # if uno_zero == 0 and uno_uno == 0:
+        #     uno_zero = 1
+        #     uno_uno = 1
 
-        return this_round_users, dato_disass[0][5], dato_disass[1][5], int(uno_zero/(uno_zero+uno_uno)*dato_disass[2][5]), int(uno_uno/(uno_zero+uno_uno)*dato_disass[2][5]), this_round_profit
+        return this_round_users, users_per_category_copy[0][5], users_per_category_copy[1][5], int(users_per_category_copy[2][5]/2), int(users_per_category_copy[2][5]/2), this_round_profit

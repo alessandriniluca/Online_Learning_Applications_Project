@@ -6,7 +6,7 @@ from bandits.gpucb1 import GPUCB1_Learner
 from bandits.multi_learner import MultiLearner
 from change_detection.alpha_function_generator import AlphaFunctionGenerator
 from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions, \
-    LearnerType
+    LearnerType, save_data
 from environment.environment import Environment
 from optimizer.estimator import Estimator
 from optimizer.full_optimizer import FullOptimizer
@@ -172,6 +172,15 @@ for e in range(0, N_EXPERIMENTS):
 # print("REG:", mean_regret)
 # print("PROF:", mean_profit)
 print(best_allocation_res)
+
+save_data("task6_sliding_window",
+    [
+    "experiments: "+str(N_EXPERIMENTS),
+    "rounds: "+str(TIME_HORIZON),
+    "regret", list(np.mean(mean_regret, axis=0)), 
+    "profit", list(np.mean(mean_profit, axis=0)),
+    "std_dev", list(np.std(mean_profit, axis=0))]
+    )
 
 plt.figure(0)
 plt.ylabel("Regret")

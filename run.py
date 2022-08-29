@@ -15,6 +15,6 @@ if task == 1:
 elif task == 2:
     import simulations.task2.base
 elif task == 3:
-    import simulations.task3.base
+    import simulations.task3.base_ts
 else:
     print("no task found...")

@@ -1,14 +1,16 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from context_generation.context_generator import ContextGenerator
-
+from bandits.gpts import GPTS_Learner
+from bandits.gpucb1 import GPUCB1_Learner
+from bandits.multi_learner import MultiLearner
 from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions, \
-    LearnerType, save_data, translate_feature_group
-from environment.environment_context import Environment
+    LearnerType
+from environment.environment import Environment
 from optimizer.estimator import Estimator
-from optimizer.full_optimizer_context import FullOptimizer
-from optimizer.optimizer_context import Optimizer
+from optimizer.full_optimizer import FullOptimizer
+from optimizer.optimizer import Optimizer
+from probability_calculator.quantities_estimator import QuantitiesEstimator
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 
@@ -42,13 +44,12 @@ optimizer = FullOptimizer(
     buy_probs=buy_probs,
     basic_alphas=env.configuration.basic_alphas,
     alphas_functions=alphas_functions,
-    features_division=[[0], [1], [2,3]],
-    one_campaign_per_product=False
+    one_campaign_per_product=True
 )
 
 # Optimize 5 campaigns with all data known to compute the baseline
 print("=== OPTIMIZER STARTED ===")
-optimizer.one_campaign_per_product = False
+optimizer.one_campaign_per_product = True
 optimizer.run_optimization()
 best_allocation, best_expected_profit = optimizer.find_best_allocation()
 print("=== THIS IS OPTIMAL ALLOCATION ===")
@@ -56,16 +57,13 @@ print(best_allocation)
 
 # Start simulation estimating alpha functions
 
-TIME_HORIZON = 35
-N_EXPERIMENTS = 70
+TIME_HORIZON = 30
+N_EXPERIMENTS = 1
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
 budgets = np.linspace(0, sim_configuration["total_budget"], n_arms)
-
-mean_profit = []
-mean_regret = []
-
+profits = []
 
 for e in range(0, N_EXPERIMENTS):
     # Initialize a bandits to estimate alpha functions
@@ -73,24 +71,13 @@ for e in range(0, N_EXPERIMENTS):
     #      meglio fissare un seed per i generatori random così da poter riprodurre e confrontare
     #      gli esperimenti
     #gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
-    # print("EEEEEEE", budgets)
-    context_generator = ContextGenerator(n_arms, budgets, LearnerType.UCB1)
-    context_generator.start()
-    env = Environment(
-        configuration=env_configuration,
-        alphas_functions=alphas_functions
-    )
-    profits = []
-
-    print("-----*******--------ROUND NUMERO: ", e)
+    gpts_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
+    quantities = QuantitiesEstimator(env.products)
 
     for t in range(TIME_HORIZON):
-
-        if t % 12 == 0 and t > 1:
-            context_generator.split()
-        
         # Ask for estimations (get alpha primes)
-        contexts, ts_alpha_prime = context_generator.get_expected_rewards()
+        ts_alpha_prime = gpts_learners.get_expected_rewards()
+
 
         # Run optimization
         optimizer = Optimizer(
@@ -100,19 +87,19 @@ for e in range(0, N_EXPERIMENTS):
             total_budget=sim_configuration["total_budget"],
             resolution=sim_configuration["resolution"],
             products=env.products,
-            mean_quantities=context_generator.get_quantities(),
+            mean_quantities=quantities.get_quantities(),
             buy_probs=buy_probs,
             alphas=ts_alpha_prime,
-            features_division=translate_feature_group(contexts),
-            one_campaign_per_product=False
+            one_campaign_per_product=True
         )
 
+        
         optimizer.run_optimization()
         current_allocation, expected_profit = optimizer.find_best_allocation()
         print(current_allocation)
 
         # Compute Rewards from the environment
-        round_users, feature0_escaped, feature1_escaped, feature2_escaped, feature3_escaped, round_profit = env.round(current_allocation, translate_feature_group(contexts))
+        round_users, total_users, round_profit = env.round(current_allocation)
 
         # Update the learners - 0/1 implementation
         # Note: as discussed we try to provide to the learner 1 if a user started from corresponding product
@@ -120,49 +107,31 @@ for e in range(0, N_EXPERIMENTS):
         # TODO This approach needs to be tested and compared with direct approach (estimate alpha as buyers/tot directly)
         #      Note that this approach is not so efficient since require more of computation and memory
         rewards = [[], [], [], [], []]
-        user_features = []
         for user in round_users:
             # compute the rewards
-            user_features.append(user.features)
             for reward_index, reward in enumerate(rewards):
                 # if the index match reward is 1
-                if reward_index == user.starting_product:
+                if reward_index == user.seen_product[0].number:
                     reward.append(1)
                 # otherwise zero
                 else:
                     reward.append(0)
 
+        # Array with one zero for each lost customer
+        lost_users_reward = np.zeros(total_users - len(round_users))
         # fill the rewards to compensate lost users
-        for i in range(feature0_escaped):
-            user_features.append((0,0))
-            for j in range(len(rewards)):
-                rewards[j].append(0)
+        for i in range(len(rewards)):
+            rewards[i] = np.concatenate((rewards[i], lost_users_reward))
 
-        for i in range(feature1_escaped):
-            user_features.append((0,1))
-            for j in range(len(rewards)):
-                rewards[j].append(0)
-
-        for i in range(feature2_escaped):
-            user_features.append((1,0))
-            for j in range(len(rewards)):
-                rewards[j].append(0)
-
-        for i in range(feature3_escaped):
-            user_features.append((1,1))
-            for j in range(len(rewards)):
-                rewards[j].append(0)
-        
         # compute index of arm played
         # TODO this could be prevented making update method work also with value (not only index)
         arm_indexes = []
         for allocation in current_allocation:
             arm_indexes.append(np.where(budgets == allocation)[0][0])
+
         # update the learners
-        # print("INDICE::::", arm_indexes)
-        # print("Rewards:::", rewards)
-        context_generator.update_quantities(round_users)
-        context_generator.update(arm_indexes, rewards, user_features)
+        gpts_learners.update(arm_indexes, rewards)
+        quantities.update_quantities(round_users)
         profits.append(round_profit)
 
     # TODO end of simulation, compare result and analyze regret vs clairvoyant
@@ -172,38 +141,22 @@ for e in range(0, N_EXPERIMENTS):
     for profit in profits:
         regrets.append(best_expected_profit - profit)
 
-    mean_profit.append(profits)
-    mean_regret.append(regrets)
+    plt.figure(0)
+    plt.ylabel("Regret")
+    plt.xlabel("t")
+    plt.plot(regrets, 'r')
 
-# print("REG:", mean_regret)
-# print("PROF:", mean_profit)
+    plt.legend(["REGRET"])
+    plt.show()
 
-save_data("task7_classes",
-    [
-    "experiments: "+str(N_EXPERIMENTS),
-    "rounds: "+str(TIME_HORIZON),
-    "regret", list(np.mean(mean_regret, axis=0)), 
-    "profit", list(np.mean(mean_profit, axis=0)),
-    "std_dev", list(np.std(mean_profit, axis=0))]
-    )
+    plt.figure(1)
+    plt.ylabel("Profit")
+    plt.xlabel("t")
+    plt.plot(profits, 'g')
+    plt.axhline(y=best_expected_profit, color='b', linestyle='-')
 
-
-plt.figure(0)
-plt.ylabel("Regret")
-plt.xlabel("t")
-plt.plot(np.mean(mean_regret, axis=0), 'r')
-
-plt.legend(["REGRET"])
-plt.show()
-
-plt.figure(1)
-plt.ylabel("Profit")
-plt.xlabel("t")
-plt.plot(np.mean(mean_profit, axis=0), 'g')
-plt.axhline(y=best_expected_profit, color='b', linestyle='-')
-
-plt.legend(["PROFIT", "OPTIMAL AVG"])
-plt.show()
+    plt.legend(["PROFIT", "OPTIMAL AVG"])
+    plt.show()
 
 if __name__ == '__main__':
     print("simulation done")
