@@ -70,9 +70,11 @@ for experiment in range(N_EXPERIMENTS):
         graph_estimator.update_graph_probabilities(users_history)
         estimator.update_graph_clicks(graph_estimator.get_estimated_graph())
         print(best_allocation)
+    
     # For each experiment, we have to zero everything to repeat the estimation
     test_experiments.append(graph_estimator.get_estimated_graph().copy())
     graph_estimator.reset()
+    estimator.update_graph_clicks(graph_estimator.get_estimated_graph())
     optimizer.set_buy_probabilities(estimator.get_buy_probs())
     logger.info("Best allocation for experiment: " + str(best_allocation))
     logger.info("Reward: ")
