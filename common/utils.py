@@ -167,7 +167,7 @@ def save_data(task_name, values):
     ts = time.time()
     ts = datetime.fromtimestamp(ts)
 
-    file_name = "../../results/result_"+str(task_name)+"_"+str(ts)+".txt"
+    file_name = "results/result_"+str(task_name)+"_"+str(ts)+".txt"
     with open(file_name, 'w') as f:
         for value in values:
             f.write(str(value))

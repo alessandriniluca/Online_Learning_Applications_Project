@@ -13,8 +13,8 @@ from optimizer.optimizer_context import Optimizer
 np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 
 
-env_configuration = load_static_env_configuration("../../configurations/environment/static_conf_1.json")
-sim_configuration = load_static_sim_configuration("../../configurations/simulation/sim_conf_1.json")
+env_configuration = load_static_env_configuration("configurations/environment/static_conf_1.json")
+sim_configuration = load_static_sim_configuration("configurations/simulation/sim_conf_1.json")
 alphas_functions = get_test_alphas_functions()
 
 env = Environment(
@@ -57,7 +57,7 @@ print(best_allocation, best_expected_profit)
 # Start simulation estimating alpha functions
 
 TIME_HORIZON = 35
-N_EXPERIMENTS = 10
+N_EXPERIMENTS = 3
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
@@ -75,7 +75,7 @@ for e in range(0, N_EXPERIMENTS):
     #gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
     # print("EEEEEEE", budgets)
     context_generator = ContextGenerator(n_arms, budgets, LearnerType.UCB1)
-    context_generator.start()
+    context_generator.start() # crea un unico context con un unico bandit
     env = Environment(
         configuration=env_configuration,
         alphas_functions=alphas_functions
@@ -86,7 +86,7 @@ for e in range(0, N_EXPERIMENTS):
 
     for t in range(TIME_HORIZON):
 
-        if t % 12 == 0 and t > 1:
+        if t % 14 == 0 and t > 1:
             context_generator.split()
         
         # Ask for estimations (get alpha primes)

@@ -14,8 +14,8 @@ np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
 logger = get_logger(__name__)
 
 
-env_configuration = load_static_env_configuration("../../configurations/environment/static_conf_1.json")
-sim_configuration = load_static_sim_configuration("../../configurations/simulation/sim_conf_1.json")
+env_configuration = load_static_env_configuration("configurations/environment/static_conf_1.json")
+sim_configuration = load_static_sim_configuration("configurations/simulation/sim_conf_1.json")
 alphas_functions = get_test_alphas_functions()
 
 ROUNDS = 90

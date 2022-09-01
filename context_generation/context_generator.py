@@ -55,10 +55,6 @@ class ContextGenerator:
         
     
     def split(self):
-        tot = 0
-        for i in range(self.n_arms):
-            for j in range(self.n_learners):
-                tot = tot + len(self.rewards_per_feature[i][j][0][0]) + len(self.rewards_per_feature[i][j][0][1]) + len(self.rewards_per_feature[i][j][1][0]) +len(self.rewards_per_feature[i][j][1][1])
         self.active_contexts = []
         self.splitted_features = []
 
@@ -174,8 +170,8 @@ class ContextGenerator:
     def optimize(self, alphas, features):
 
         # print("Tipo alpha:", type(alphas), alphas)
-        env_configuration = load_static_env_configuration("../../configurations/environment/static_conf_1.json")
-        sim_configuration = load_static_sim_configuration("../../configurations/simulation/sim_conf_1.json")
+        env_configuration = load_static_env_configuration("configurations/environment/static_conf_1.json")
+        sim_configuration = load_static_sim_configuration("configurations/simulation/sim_conf_1.json")
         alphas_functions = get_test_alphas_functions()
 
         env = Environment(
