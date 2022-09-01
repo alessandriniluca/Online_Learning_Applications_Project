@@ -3,6 +3,8 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
 
 from bandits.learner import Learner
+from matplotlib import pyplot as plt
+
 
 
 class GPTS_Learner(Learner):
@@ -15,8 +17,8 @@ class GPTS_Learner(Learner):
         self.means = np.zeros(self.n_arms)
         self.sigmas = np.ones(self.n_arms) * 8
         self.pulled_arms = []
-        alpha = 1.0
-        kernel = C(1, constant_value_bounds="fixed") * RBF(2, length_scale_bounds="fixed")
+        alpha = .5
+        kernel = C(5, constant_value_bounds="fixed") * RBF(20, length_scale_bounds="fixed")
         # kernel = 1 * RBF(length_scale=2.0, length_scale_bounds=(1e-2, 1e2))
         self.gp = GaussianProcessRegressor(
             kernel=kernel,
@@ -49,6 +51,21 @@ class GPTS_Learner(Learner):
 
         # sigma lower bound
         self.sigmas = np.maximum(self.sigmas, 1e-2)
+
+        # x_pred = np.atleast_2d(self.arms).T
+        # y_pred, sigma = self.gp.predict(x_pred, return_std=True)
+        # plt.figure(self.t)
+        # plt.title(f'Iteration {self.t} {self.name}')
+        # plt.plot(x.ravel(), y, 'ro', label=r'Observed Clicks')
+        # plt.plot(x_pred, y_pred, 'b-', label=r'Predicted clicks')
+        # plt.fill(
+        #     np.concatenate([x_pred, x_pred[::-1]]), 
+        #     np.concatenate([y_pred - 1.96 * sigma, (y_pred + 1.96 * sigma)[::-1]]),
+        #     alpha=.5, fc='b', ec='None', label='95% conf interval')
+        # plt.xlabel('$x$')
+        # plt.ylabel('$n(x)$')
+        # plt.legend(loc='lower right')
+        # plt.show()
         
 
     def update(self, pulled_arm, reward):

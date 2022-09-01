@@ -90,6 +90,7 @@ class FullOptimizer(Optimizer):
                                            basic_alphas,
                                            alphas_functions,
                                            one_campaign_per_product)
+        print(self.alphas)
 
     @property
     def one_campaign_per_product(self):

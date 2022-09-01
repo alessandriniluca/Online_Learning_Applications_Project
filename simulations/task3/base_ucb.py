@@ -47,7 +47,7 @@ optimizer = FullOptimizer(
 )
 
 # Optimize 5 campaigns with all data known to compute the baseline
-print("=== OPTIMIZER STARTED ===")
+print("=== OPTIMIZER STARTED task3 UCB1 ===")
 optimizer.one_campaign_per_product = True
 optimizer.run_optimization()
 best_allocation, best_expected_profit = optimizer.find_best_allocation()

@@ -19,8 +19,9 @@ class GPUCB1_Learner(Learner):
         self.means = np.zeros(self.n_arms)
         self.sigmas = np.ones(self.n_arms) * 8
         self.pulled_arms = []
-        alpha = 1.0
-        kernel = C(1, constant_value_bounds="fixed") * RBF(2, length_scale_bounds="fixed")
+        alpha = .5
+        kernel = C(5, constant_value_bounds="fixed") * RBF(20, length_scale_bounds="fixed")
+
         # kernel = 1 * RBF(length_scale=2.0, length_scale_bounds=(1e-2, 1e2))
         self.gp = GaussianProcessRegressor(
             kernel=kernel,

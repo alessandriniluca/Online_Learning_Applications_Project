@@ -47,7 +47,7 @@ optimizer = FullOptimizer(
 )
 
 # Optimize 5 campaigns with all data known to compute the baseline
-print("=== OPTIMIZER STARTED ===")
+print("=== OPTIMIZER STARTED task3 TS ===")
 optimizer.one_campaign_per_product = True
 optimizer.run_optimization()
 best_allocation, best_expected_profit = optimizer.find_best_allocation()
@@ -56,8 +56,8 @@ print(best_allocation)
 
 # Start simulation estimating alpha functions
 
-TIME_HORIZON = 35
-N_EXPERIMENTS = 600
+TIME_HORIZON = 30
+N_EXPERIMENTS = 500
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1

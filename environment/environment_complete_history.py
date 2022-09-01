@@ -13,6 +13,7 @@ class EnvironmentCompleteHistory(Environment):
         super().__init__(configuration, alphas_functions)
 
     def round(self, budget):
+        this_round_profit = 0
         """
         Simulate a round given a budget allocation
         """
@@ -122,6 +123,7 @@ class EnvironmentCompleteHistory(Environment):
                             # handle the quantity bought
                             qta = user.quantity_bought(prod)
                             user.add_bought_product(prod, qta)
+                            this_round_profit += prod.price * qta
 
                             # if click on 1st secondary
                             if user.product_click(prod, prod.secondary_a):
@@ -151,7 +153,7 @@ class EnvironmentCompleteHistory(Environment):
         # update history
         self.users_per_round.append(this_round_users)
 
-        return users_history
+        return users_history, this_round_profit
 
     # def set_graph_estimation(self, estimation):
     #     self.estimated_graph_clicks = estimation

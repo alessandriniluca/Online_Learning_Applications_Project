@@ -13,6 +13,7 @@ from optimizer.full_optimizer import FullOptimizer
 from optimizer.optimizer import Optimizer
 
 np.set_printoptions(formatter={'float': lambda x: "{0:0.10f}".format(x)})
+print("=== OPTIMIZER STARTED task6 SLIDING WINDOW===")
 
 
 env_configuration = load_static_env_configuration("configurations/environment/static_conf_1.json")
