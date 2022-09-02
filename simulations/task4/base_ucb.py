@@ -58,7 +58,7 @@ print(best_allocation)
 # Start simulation estimating alpha functions
 
 TIME_HORIZON = 45
-N_EXPERIMENTS = 100
+N_EXPERIMENTS = 2
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
@@ -81,12 +81,13 @@ for e in range(0, N_EXPERIMENTS):
         alphas_functions=alphas_functions
     )
     profits = []
+    quantities = QuantitiesEstimator(env.products)
+
 
     for t in range(TIME_HORIZON):
         
         # Ask for estimations (get alpha primes)
         ts_alpha_prime = gpts_learners.get_expected_rewards()
-        quantities = QuantitiesEstimator(env.products)
 
 
         # Run optimization
