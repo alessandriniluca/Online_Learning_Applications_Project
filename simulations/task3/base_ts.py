@@ -56,8 +56,8 @@ print(best_allocation)
 
 # Start simulation estimating alpha functions
 
-TIME_HORIZON = 30
-N_EXPERIMENTS = 500
+TIME_HORIZON = 48
+N_EXPERIMENTS = 10
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
@@ -68,6 +68,8 @@ mean_regret = []
 
 
 for e in range(0, N_EXPERIMENTS):
+    print("experiment number:", e)
+
     # Initialize a bandits to estimate alpha functions
     # TODO forse meglio gestire due simulazioni differenti, una per TS e una per UCB
     #      meglio fissare un seed per i generatori random così da poter riprodurre e confrontare

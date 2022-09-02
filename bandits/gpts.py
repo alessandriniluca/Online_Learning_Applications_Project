@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
+from sklearn.gaussian_process.kernels import RBF, Matern, ConstantKernel as C
 
 from bandits.learner import Learner
 from matplotlib import pyplot as plt
@@ -18,8 +18,8 @@ class GPTS_Learner(Learner):
         self.sigmas = np.ones(self.n_arms) * 8
         self.pulled_arms = []
         alpha = .5
-        kernel = C(5, constant_value_bounds="fixed") * RBF(20, length_scale_bounds="fixed")
-        # kernel = 1 * RBF(length_scale=2.0, length_scale_bounds=(1e-2, 1e2))
+        # kernel = C(5, constant_value_bounds="fixed") * RBF(20, length_scale_bounds="fixed")
+        kernel = Matern(length_scale=1.0, length_scale_bounds="fixed", nu=1.5)
         self.gp = GaussianProcessRegressor(
             kernel=kernel,
             alpha=alpha ** 2,
@@ -55,6 +55,7 @@ class GPTS_Learner(Learner):
         # x_pred = np.atleast_2d(self.arms).T
         # y_pred, sigma = self.gp.predict(x_pred, return_std=True)
         # plt.figure(self.t)
+        # plt.ylim(-0.5, 1.5)
         # plt.title(f'Iteration {self.t} {self.name}')
         # plt.plot(x.ravel(), y, 'ro', label=r'Observed Clicks')
         # plt.plot(x_pred, y_pred, 'b-', label=r'Predicted clicks')
@@ -82,6 +83,7 @@ class GPTS_Learner(Learner):
         Return expected rewards that will be provided to an optimizer to complete the combinatorial Bandit
         """
         sampled_values = np.random.normal(self.means, self.sigmas)
+        print("Learner ", self.name, "sampled values:", sampled_values)
         for i in range(len(sampled_values)):
             sampled_values[i] = min(max(sampled_values[i], 0.0), 1.0)
         return sampled_values
