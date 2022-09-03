@@ -164,7 +164,7 @@ class ContextGenerator:
             else:
                 context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1), (1,1)])
                 self.active_contexts.append(context)
-                self.splitted_features.append([(1,0), (1,1)])
+                self.splitted_features.append([(0,1), (1,1)])
 
 
     def optimize(self, alphas, features):
