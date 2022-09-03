@@ -1,9 +1,10 @@
 import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import RBF, Matern, ConstantKernel as C
+from sklearn.gaussian_process.kernels import RBF, Matern, RationalQuadratic, ConstantKernel as C
 
 from bandits.learner import Learner
 from matplotlib import pyplot as plt
+
 
 
 
@@ -18,8 +19,9 @@ class GPTS_Learner(Learner):
         self.sigmas = np.ones(self.n_arms) * 8
         self.pulled_arms = []
         alpha = .5
-        # kernel = C(5, constant_value_bounds="fixed") * RBF(20, length_scale_bounds="fixed")
-        kernel = Matern(length_scale=1.0, length_scale_bounds="fixed", nu=1.5)
+        kernel = C(5, constant_value_bounds="fixed") * RBF(50, length_scale_bounds="fixed")
+        # kernel = Matern(length_scale=1.0, length_scale_bounds="fixed", nu=3.5)
+        # kernel = RationalQuadratic(length_scale=1.0, alpha=1.5)
         self.gp = GaussianProcessRegressor(
             kernel=kernel,
             alpha=alpha ** 2,
@@ -50,7 +52,9 @@ class GPTS_Learner(Learner):
         self.means, self.sigmas = self.gp.predict(np.atleast_2d(self.arms).T, return_std=True)
 
         # sigma lower bound
-        self.sigmas = np.maximum(self.sigmas, 1e-2)
+        self.sigmas = np.maximum(self.sigmas, 1e-3)
+        
+        # print("----*****---- parameters", self.gp.get_params())
 
         # x_pred = np.atleast_2d(self.arms).T
         # y_pred, sigma = self.gp.predict(x_pred, return_std=True)

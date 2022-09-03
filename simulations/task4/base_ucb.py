@@ -58,7 +58,7 @@ print(best_allocation)
 # Start simulation estimating alpha functions
 
 TIME_HORIZON = 45
-N_EXPERIMENTS = 2
+N_EXPERIMENTS = 10
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
