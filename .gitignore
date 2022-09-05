@@ -132,4 +132,7 @@ dmypy.json
 
 .idea/
 
-results/
+# ignore the results
+results/*
+# except readme
+!results/readme.md
