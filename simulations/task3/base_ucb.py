@@ -72,8 +72,7 @@ for e in range(0, N_EXPERIMENTS):
     # TODO forse meglio gestire due simulazioni differenti, una per TS e una per UCB
     #      meglio fissare un seed per i generatori random così da poter riprodurre e confrontare
     #      gli esperimenti
-    #gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
-    gpts_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
+    gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
 
     env = Environment(
         configuration=env_configuration,
@@ -84,7 +83,7 @@ for e in range(0, N_EXPERIMENTS):
     for t in range(TIME_HORIZON):
         
         # Ask for estimations (get alpha primes)
-        ts_alpha_prime = gpts_learners.get_expected_rewards()
+        ts_alpha_prime = gpucb_learners.get_expected_rewards()
 
         # Run optimization
         optimizer = Optimizer(
@@ -138,7 +137,7 @@ for e in range(0, N_EXPERIMENTS):
         # update the learners
         # print("INDICE::::", arm_indexes)
         # print("Rewards:::", rewards)
-        gpts_learners.update(arm_indexes, rewards)
+        gpucb_learners.update(arm_indexes, rewards)
         profits.append(round_profit)
 
     # TODO end of simulation, compare result and analyze regret vs clairvoyant
