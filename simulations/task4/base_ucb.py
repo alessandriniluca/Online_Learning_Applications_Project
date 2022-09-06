@@ -1,8 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from bandits.gpts import GPTS_Learner
-from bandits.gpucb1 import GPUCB1_Learner
 from bandits.multi_learner import MultiLearner
 from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions, \
     LearnerType, save_data
@@ -73,8 +71,7 @@ for e in range(0, N_EXPERIMENTS):
     # TODO forse meglio gestire due simulazioni differenti, una per TS e una per UCB
     #      meglio fissare un seed per i generatori random così da poter riprodurre e confrontare
     #      gli esperimenti
-    #gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
-    gpts_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
+    gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
 
     env = Environment(
         configuration=env_configuration,
@@ -87,7 +84,7 @@ for e in range(0, N_EXPERIMENTS):
     for t in range(TIME_HORIZON):
         
         # Ask for estimations (get alpha primes)
-        ts_alpha_prime = gpts_learners.get_expected_rewards()
+        ucb_alpha_prime = gpucb_learners.get_expected_rewards()
 
 
         # Run optimization
@@ -100,7 +97,7 @@ for e in range(0, N_EXPERIMENTS):
             products=env.products,
             mean_quantities=quantities.get_quantities(),
             buy_probs=buy_probs,
-            alphas=ts_alpha_prime,
+            alphas=ucb_alpha_prime,
             one_campaign_per_product=True
         )
 
@@ -142,7 +139,7 @@ for e in range(0, N_EXPERIMENTS):
         # update the learners
         # print("INDICE::::", arm_indexes)
         # print("Rewards:::", rewards)
-        gpts_learners.update(arm_indexes, rewards)
+        gpucb_learners.update(arm_indexes, rewards)
         quantities.update_quantities(round_users)
         profits.append(round_profit)
 

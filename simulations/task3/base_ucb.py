@@ -1,8 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
-from bandits.gpts import GPTS_Learner
-from bandits.gpucb1 import GPUCB1_Learner
 from bandits.multi_learner import MultiLearner
 from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions, \
     LearnerType, save_data
@@ -83,7 +81,7 @@ for e in range(0, N_EXPERIMENTS):
     for t in range(TIME_HORIZON):
         
         # Ask for estimations (get alpha primes)
-        ts_alpha_prime = gpucb_learners.get_expected_rewards()
+        ucb_alpha_prime = gpucb_learners.get_expected_rewards()
 
         # Run optimization
         optimizer = Optimizer(
@@ -95,7 +93,7 @@ for e in range(0, N_EXPERIMENTS):
             products=env.products,
             mean_quantities=env.configuration.quantity_means,
             buy_probs=buy_probs,
-            alphas=ts_alpha_prime,
+            alphas=ucb_alpha_prime,
             one_campaign_per_product=True
         )
 
