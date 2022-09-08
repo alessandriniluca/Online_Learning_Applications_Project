@@ -4,6 +4,8 @@ from context_generation.context import Context
 from environment.environment_context import Environment
 from optimizer.estimator import Estimator
 from optimizer.optimizer_context import Optimizer
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.gaussian_process.kernels import RBF, Matern, RationalQuadratic, ConstantKernel as C
 from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions, \
     LearnerType
 from probability_calculator.quantities_estimator_by_feature import QuantitiesEstimatorByFeatures
@@ -22,12 +24,13 @@ class ContextGenerator:
         self.n_learners=5
         self.quantity_estimator = QuantitiesEstimatorByFeatures(5, 4)
 
-        self.rewards_per_feature = np.zeros((self.n_arms, self.n_learners), dtype=np.ndarray)
+        # self.rewards_per_feature = np.zeros((self.n_arms, self.n_learners), dtype=np.ndarray)
+        self.rewards_per_feature = []
 
-        for i in range(self.n_arms):
-            for j in range(self.n_learners):
-                #rewards_per_product = [[[], []], [[], []]]
-                self.rewards_per_feature[i][j] = [[[], []], [[], []]]
+        # for i in range(self.n_arms):
+        #     for j in range(self.n_learners):
+        #         #rewards_per_product = [[[], []], [[], []]]
+        #         self.rewards_per_feature[i][j] = [[[], []], [[], []]]
 
 
     def start(self):
@@ -39,12 +42,12 @@ class ContextGenerator:
     def add_reward(self, product_number, arm_idx, user_feature, reward):
         feature1 = user_feature[0]
         feature2 = user_feature[1]
-        a = None
+        float_arm = None
         for s in self.splitted_features:
             if (feature1, feature2) in s:
-                a = self.arms[arm_idx]/self.get_users_in_context(s) * self.get_users_in_context(user_feature)
-                a = int(a/5)
-        self.rewards_per_feature[arm_idx][product_number][feature1][feature2].append(reward)
+                # print("-----", self.arms[arm_idx], self.get_users_in_context(s), self.get_users_in_context([user_feature]))
+                float_arm = self.arms[arm_idx]/self.get_users_in_context(s) * self.get_users_in_context([user_feature])
+        self.rewards_per_feature.append([reward, product_number, float_arm, user_feature])
 
     def get_users_in_context(self, feature_list):
         tot = 0
@@ -243,23 +246,51 @@ class ContextGenerator:
 
 
     def get_alphas_by_feature(self, features):
+
+        gps = []
+        alphas = np.zeros((self.n_arms, self.n_learners, 1))
         """
 
         Args:
             features (list): it is a list like [(0,0), (1,0)] of the feature you are interested in
         """
-        
-        alphas = np.zeros((self.n_arms, self.n_learners, 1))
 
-        for i in range(self.n_arms):
-            for j in range(self.n_learners):
-                tot = []
-                for k in features:      
-                    tot += self.rewards_per_feature[i][j][k[0]][k[1]]
-                # print(".---------media:", tot,  self.compute_mean(tot), "lb:", self.lower_bound(0.95, len(tot)))
-                alphas[i][j][0] = self.compute_mean(tot) - self.lower_bound(0.99, len(tot))
+        alpha = .5
+        kernel = C(5, constant_value_bounds="fixed") * RBF(50, length_scale_bounds="fixed")
+
+        for i in range(self.n_learners):
+            gp = GaussianProcessRegressor(
+                kernel=kernel,
+                alpha=alpha ** 2,
+                normalize_y=True,
+                n_restarts_optimizer=9
+            )
+
+            gps.append(gp)
+
+
+            x = []
+            y = []
+
+            for user in self.rewards_per_feature:
+                if user[3] in features and user[1] == i:
+                    x.append(user[2])
+                    y.append(user[0])
+
+            x = np.atleast_2d(x).T
+
+            # Retrain the GP
+            gp.fit(x, y)
+
+
+            mean, sigma = gp.predict(np.atleast_2d(self.arms).T, return_std=True)
+            lower_bound = mean-sigma
+
+            alphas[:, i, 0] = np.array(lower_bound)
 
         return alphas
+            
+
 
 
     def lower_bound(self, delta, set_cardinality):
