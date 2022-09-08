@@ -1,0 +1,48 @@
+{
+    "average_users_number": [20, 20, 20],
+    "std_users": [1, 1, 1],
+    "basic_alphas": [[1, 1, 1, 1, 1, 120], [1, 1, 1, 1, 1, 90], [1, 1, 1, 1, 1, 100]],
+    "products_parameters" : [
+        {
+            "name": "P0",
+            "price": 80,
+            "number": 0,
+            "secondary": [1, 2]
+        },
+        {
+            "name": "P1",
+            "price": 34,
+            "number": 1,
+            "secondary": [2, 3]
+        },
+        {
+            "name": "P2",
+            "price": 99,
+            "number": 2,
+            "secondary": [0, 4]
+        },
+        {
+            "name": "P3",
+            "price": 51,
+            "number": 3,
+            "secondary": [0, 2]
+        },{
+            "name": "P4",
+            "price": 23,
+            "number": 4,
+            "secondary": [0, 3]
+        }
+    ],
+    "lambda_prob": 0.8,
+    "graph_clicks": [
+        [0.3, 0.2, 0.3, 0.5, 0.45],
+        [0.4, 0.3, 0.5, 0.6, 0.1],
+        [0.1, 0.8, 0.7, 0.2, 0.3],
+        [0.4, 0.7, 0.8, 0.3, 0.2],
+        [0.1, 0.8, 0.6, 0.8, 0.2]
+    ],
+    "reservation_price_means": [[85, 34, 100, 49, 25], [85, 38, 103, 55, 20], [85, 30, 95, 45, 22]],
+    "reservation_price_std_dev": [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]],
+    "quantity_means": [[25, 14, 4, 10, 8], [1, 14, 5, 11, 6], [1, 12, 3, 9, 8]],
+    "quantity_std_dev": [[1, 1, 1, 1, 1], [1, 1, 1, 1, 1], [1, 1, 1, 1, 1]]
+}
