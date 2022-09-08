@@ -34,7 +34,7 @@ class ContextGenerator:
 
 
     def start(self):
-        context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (0,1), (1,0), (1,1)])
+        context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (0,1), (1,0), (1,1)])
         self.active_contexts.append(context)
         self.splitted_features.append([(0,0), (0,1), (1,0), (1,1)])
 
@@ -77,7 +77,7 @@ class ContextGenerator:
 
         print("------ reward no split", reward_no_split, "Reward first feature", reward_first_feature, "Reward second feature", reward_second_feature)
         if reward_no_split > reward_first_feature and reward_no_split > reward_second_feature:
-            context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (0,1), (1,0), (1,1)])
+            context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (0,1), (1,0), (1,1)])
             self.active_contexts.append(context)
             self.splitted_features.append([(0,0), (0,1), (1,0), (1,1)])
 
@@ -95,14 +95,14 @@ class ContextGenerator:
             
             if aggregate_1 < splitted_reward:
                 # split primo dei due gruppi
-                context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0)])
+                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0)])
                 self.active_contexts.append(context)
-                context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1)])
+                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1)])
                 self.active_contexts.append(context)
                 self.splitted_features.append([(0,0)])
                 self.splitted_features.append([(0,1)])
             else:
-                context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (0,1)])
+                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (0,1)])
                 self.active_contexts.append(context)
                 self.splitted_features.append([(0,0), (0,1)])
 
@@ -115,14 +115,14 @@ class ContextGenerator:
             print("------1st aggregate_2", aggregate_2, "splitted_reward", splitted_reward)
 
             if aggregate_2 < splitted_reward:
-                context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0)])
+                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0)])
                 self.active_contexts.append(context)
-                context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,1)])
+                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,1)])
                 self.active_contexts.append(context)
                 self.splitted_features.append([(1,0)])
                 self.splitted_features.append([(1,1)])
             else:
-                context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0), (1,1)])
+                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0), (1,1)])
                 self.active_contexts.append(context)
                 self.splitted_features.append([(1,0), (1,1)])
             
@@ -138,14 +138,14 @@ class ContextGenerator:
 
             if aggregate_1 < splitted_reward:
                 # split primo dei due gruppi
-                context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0)])
+                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0)])
                 self.active_contexts.append(context)
-                context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0)])
+                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0)])
                 self.active_contexts.append(context)
                 self.splitted_features.append([(0,0)])
                 self.splitted_features.append([(1,0)])
             else:
-                context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (1,0)])
+                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (1,0)])
                 self.active_contexts.append(context)
                 self.splitted_features.append([(0,0),(1,0)])
 
@@ -158,14 +158,14 @@ class ContextGenerator:
 
             if aggregate_2 < splitted_reward:
                 # split primo dei due gruppi
-                context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1)])
+                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1)])
                 self.active_contexts.append(context)
-                context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,1)])
+                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,1)])
                 self.active_contexts.append(context)
                 self.splitted_features.append([(0,1)])
                 self.splitted_features.append([(1,1)])
             else:
-                context = Context(self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1), (1,1)])
+                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1), (1,1)])
                 self.active_contexts.append(context)
                 self.splitted_features.append([(0,1), (1,1)])
 
@@ -274,7 +274,7 @@ class ContextGenerator:
 
             for user in self.rewards_per_feature:
                 if user[3] in features and user[1] == i:
-                    x.append(user[2])
+                    x.append(user[2] * self.get_users_in_context(features) / self.get_users_in_context([user[3]]))
                     y.append(user[0])
 
             x = np.atleast_2d(x).T

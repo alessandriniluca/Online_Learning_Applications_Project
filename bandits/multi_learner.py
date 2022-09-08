@@ -47,3 +47,9 @@ class MultiLearner:
         for i, arm in enumerate(pulled_arms):
             if arm >= 0:
                 self.learners[i].update(arm, rewards[i])
+
+    def update_single(self, mab_number, x, y):
+        self.learners[mab_number].pulled_arms += x
+        for reward in y:
+            self.learners[mab_number].collected_rewards = np.append(self.learners[mab_number].collected_rewards, reward)
+        self.learners[mab_number].update_model()
