@@ -56,7 +56,7 @@ print(best_allocation)
 
 # Start simulation estimating alpha functions
 
-TIME_HORIZON = 48
+TIME_HORIZON = 14
 N_EXPERIMENTS = 10
 N_CAMPAIGNS = 5
 
