@@ -9,6 +9,7 @@ from sklearn.gaussian_process.kernels import RBF, Matern, RationalQuadratic, Con
 from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions, \
     LearnerType
 from probability_calculator.quantities_estimator_by_feature import QuantitiesEstimatorByFeatures
+from matplotlib import pyplot as plt
 
 
 
@@ -20,7 +21,7 @@ class ContextGenerator:
         self.arms = arms
         self.learner_type = learner_type
         self.splitted_features = []
-        self.average_users_per_feature = [45, 45, 22, 22]
+        self.average_users_per_feature = [50, 50, 50, 50]
         self.n_learners=5
         self.quantity_estimator = QuantitiesEstimatorByFeatures(5, 4)
 
@@ -67,13 +68,19 @@ class ContextGenerator:
         # try split first feature
         first_feature_1 = self.get_alphas_by_feature([(0,0), (0,1)])
         first_feature_2 = self.get_alphas_by_feature([(1,0), (1,1)])
-        reward_first_feature = self.optimize(first_feature_1, [(0,0), (0,1)]) + self.optimize(first_feature_2, [(1,0), (1,1)])
+        a = self.optimize(first_feature_1, [(0,0), (0,1)]) 
+        b = self.optimize(first_feature_2, [(1,0), (1,1)])
+        print("---a:", a, "--b:", b)
+        reward_first_feature = a + b
 
 
         #try split second feature
         second_feature_1 = self.get_alphas_by_feature([(0,0), (1,0)])
         second_feature_2 = self.get_alphas_by_feature([(0,1), (1,1)])
-        reward_second_feature = self.optimize(second_feature_1, [(0,0), (1,0)]) + self.optimize(second_feature_2, [(0,1), (1,1)])
+        a = self.optimize(second_feature_1, [(0,0), (1,0)]) 
+        b = self.optimize(second_feature_2, [(0,1), (1,1)])
+        print("22---a:", a, "--b:", b)
+        reward_second_feature = a + b
 
         print("------ reward no split", reward_no_split, "Reward first feature", reward_first_feature, "Reward second feature", reward_second_feature)
         if reward_no_split > reward_first_feature and reward_no_split > reward_second_feature:
@@ -206,13 +213,13 @@ class ContextGenerator:
         users = [0, 0, 0, 0]
         for i, users_number in enumerate(user_number_per_feature):
             if i in class_features:
-                users[i] = users_number + int(users_to_divide/total_users_in_context*users_number)
+                users[i] = users_number #+ int(users_to_divide/total_users_in_context*users_number)
             
 
 
         # print("TRADUZIONE", self.translate_features(features))
         optimizer = Optimizer(
-            users_number=users,
+            users_number=env.average_users_per_feature,
             min_budget=sim_configuration["min_budget"],
             max_budget=sim_configuration["max_budget"],
             total_budget=sim_configuration["total_budget"],
@@ -228,7 +235,7 @@ class ContextGenerator:
 
         optimizer.run_optimization()
         current_allocation, expected_profit = optimizer.find_best_allocation()
-        return expected_profit * total_users_in_context / (total_users_in_context + users_to_divide)
+        return expected_profit #* total_users_in_context / (total_users_in_context + users_to_divide)
 
 
     def update(self, pulled_arms, rewards, user_features):
@@ -256,7 +263,7 @@ class ContextGenerator:
         """
 
         alpha = .5
-        kernel = C(5, constant_value_bounds="fixed") * RBF(50, length_scale_bounds="fixed")
+        kernel = C(10, constant_value_bounds="fixed") * RBF(5, length_scale_bounds="fixed")
 
         for i in range(self.n_learners):
             gp = GaussianProcessRegressor(
@@ -284,9 +291,28 @@ class ContextGenerator:
 
 
             mean, sigma = gp.predict(np.atleast_2d(self.arms).T, return_std=True)
-            lower_bound = mean-sigma
+            lower_bound = mean-sigma*sigma
 
             alphas[:, i, 0] = np.array(lower_bound)
+
+
+            # x_pred = np.atleast_2d(self.arms).T
+            # y_pred, sigma = gp.predict(x_pred, return_std=True)
+            # plt.figure(0)
+            # plt.ylim(-0.5, 1.5)
+            # plt.title(f'Iteration')
+            # plt.plot(x.ravel(), y, 'ro', label=r'Observed Clicks')
+            # plt.plot(x_pred, y_pred, 'b-', label=r'Predicted clicks')
+            # plt.fill(
+            #     np.concatenate([x_pred, x_pred[::-1]]), 
+            #     np.concatenate([y_pred - 1.96 * sigma, (y_pred + 1.96 * sigma)[::-1]]),
+            #     alpha=.5, fc='b', ec='None', label='95% conf interval')
+            # plt.xlabel('$x$')
+            # plt.ylabel('$n(x)$')
+            # plt.legend(loc='lower right')
+            # plt.show()
+
+        
 
         return alphas
             

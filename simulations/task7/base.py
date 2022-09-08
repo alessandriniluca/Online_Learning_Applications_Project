@@ -56,8 +56,8 @@ print(best_allocation, best_expected_profit)
 
 # Start simulation estimating alpha functions
 
-TIME_HORIZON = 35
-N_EXPERIMENTS = 3
+TIME_HORIZON = 80
+N_EXPERIMENTS = 1
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
@@ -86,7 +86,7 @@ for e in range(0, N_EXPERIMENTS):
 
     for t in range(TIME_HORIZON):
 
-        if t % 14 == 0 and t > 1:
+        if t % 15 == 0 and t > 1:
             context_generator.split()
         
         # Ask for estimations (get alpha primes)
