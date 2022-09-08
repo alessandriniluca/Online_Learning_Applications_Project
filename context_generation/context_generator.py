@@ -215,7 +215,7 @@ class ContextGenerator:
             total_budget=sim_configuration["total_budget"],
             resolution=sim_configuration["resolution"],
             products=env.products,
-            mean_quantities=env.configuration.quantity_means,
+            mean_quantities=self.quantity_estimator.get_quantities(features),
             buy_probs=buy_probs,
             alphas=alphas,
             features_division=[self.translate_features(features)],
