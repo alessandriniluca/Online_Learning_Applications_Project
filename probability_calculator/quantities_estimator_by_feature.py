@@ -48,7 +48,6 @@ class QuantitiesEstimatorByFeatures:
                 user_context[:, 0] += users[:, feature]
 
             user_context[user_context == 0] = 1
-            buys_context[buys_context<50] = 0
 
             res = buys_context/user_context
             return np.array(res[:, 0])

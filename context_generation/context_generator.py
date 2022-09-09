@@ -15,13 +15,13 @@ from matplotlib import pyplot as plt
 
 class ContextGenerator:
 
-    def __init__(self, n_arms, arms, learner_type):
+    def __init__(self, n_arms, arms, learner_type, user_division):
         self.active_contexts = []
         self.n_arms = n_arms
         self.arms = arms
         self.learner_type = learner_type
         self.splitted_features = []
-        self.average_users_per_feature = [50, 50, 25, 25]
+        self.average_users_per_feature = [user_division[0], user_division[1], user_division[2]/2, user_division[2]/2]
         self.n_learners=5
         self.quantity_estimator = QuantitiesEstimatorByFeatures(5, 4)
 
@@ -263,7 +263,7 @@ class ContextGenerator:
         """
 
         alpha = .5
-        kernel = C(5, constant_value_bounds="fixed") * RBF(20, length_scale_bounds="fixed")
+        kernel = C(5, constant_value_bounds="fixed") * RBF(50, length_scale_bounds="fixed")
 
         for i in range(self.n_learners):
             gp = GaussianProcessRegressor(

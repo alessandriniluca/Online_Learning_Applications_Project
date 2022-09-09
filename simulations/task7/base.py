@@ -56,8 +56,8 @@ print(best_allocation, best_expected_profit)
 
 # Start simulation estimating alpha functions
 
-TIME_HORIZON = 35
-N_EXPERIMENTS = 10
+TIME_HORIZON = 50
+N_EXPERIMENTS = 1
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
@@ -74,7 +74,7 @@ for e in range(0, N_EXPERIMENTS):
     #      gli esperimenti
     #gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
     # print("EEEEEEE", budgets)
-    context_generator = ContextGenerator(n_arms, budgets, LearnerType.UCB1)
+    context_generator = ContextGenerator(n_arms, budgets, LearnerType.UCB1, env_configuration.average_users_number)
     context_generator.start() # crea un unico context con un unico bandit
     env = Environment(
         configuration=env_configuration,
