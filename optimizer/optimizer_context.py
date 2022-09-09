@@ -29,7 +29,8 @@ class Optimizer:
                  buy_probs,
                  alphas,
                  features_division,
-                 one_campaign_per_product=False):
+                 one_campaign_per_product=False,
+                 multiple_quantities=False):
         self.users_number = [users_number[0], users_number[1], users_number[2]/2, users_number[2]/2]
         self.min_budget = min_budget
         self.max_budget = max_budget
@@ -41,6 +42,7 @@ class Optimizer:
         self.buy_prob = buy_probs
         self._one_campaign_per_product = one_campaign_per_product
         self.features_division = features_division
+        self.multiple_quantities=multiple_quantities
 
         self.alphas = alphas
 
@@ -62,6 +64,7 @@ class Optimizer:
         self._one_campaign_per_product = new_value
 
     def compute_rows(self):
+        # print("----INIZIO----")
         # for each possible budget allocation
         for budget_index in range(int(self.total_budget / self.resolution) + 1):
             # for each campaign
@@ -74,28 +77,32 @@ class Optimizer:
 
                 # compute expected income
                 # print("FEATURE ORA: ", self.features_division[current_division_feature])
-                for feature in self.features_division[current_division_feature]:
+                for idx, feature in enumerate(self.features_division[current_division_feature]):
                     expected_income_per_user = 0
                     if feature > 2:
                         current_class = 2
                     else:
                         current_class = feature
+                    # print(" -- considero:", feature, "class:", current_class)
 
                     # print("start prod:", starting_prod, "current_class:", current_class)
 
+                    incomes = []
                     for arrival_prod in range(len(self.prices)):
                         # We can exploit the context, the expected income will be the one of the corrisponding class
                         expected_income_per_product = self.buy_prob[current_class][starting_prod][arrival_prod] * \
                                                     self.prices[arrival_prod]
+                        incomes.append(expected_income_per_product)
 
-
+                        if self.multiple_quantities:
                         # Same for the expected income per user
-                        expected_income_per_user += expected_income_per_product * self.mean_quantities[current_division_feature][
-                            arrival_prod]
+                            expected_income_per_user += expected_income_per_product * (self.mean_quantities[current_division_feature])[idx][arrival_prod]
+                        else:
+                            expected_income_per_user += expected_income_per_product * self.mean_quantities[current_division_feature][arrival_prod]
 
                         # print("EXp:", expected_income_per_user, "counter:", current_division_feature)
-                    # print("alpha:", self.alphas[budget_index][starting_prod][current_division_feature], "users:", self.users_number[current_class] , "income", expected_income_per_user)
-
+                    # print("alpha:", self.alphas[budget_index][starting_prod][current_division_feature], "users:", self.users_number[current_class] , "income per user", expected_income_per_user)
+                    # print("current class:", current_class, "income per product:", incomes)
                     # print("UTENTI:", self.users_number[current_class])
                     self.rows_income_per_budget[campaign][budget_index] += (
                         self.alphas[budget_index][starting_prod][current_division_feature] * self.users_number[current_class]) * expected_income_per_user

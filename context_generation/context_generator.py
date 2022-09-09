@@ -7,7 +7,7 @@ from optimizer.optimizer_context import Optimizer
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, Matern, RationalQuadratic, ConstantKernel as C
 from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions, \
-    LearnerType
+    LearnerType, translate_feature_group
 from probability_calculator.quantities_estimator_by_feature import QuantitiesEstimatorByFeatures
 from matplotlib import pyplot as plt
 
@@ -21,7 +21,7 @@ class ContextGenerator:
         self.arms = arms
         self.learner_type = learner_type
         self.splitted_features = []
-        self.average_users_per_feature = [50, 50, 50, 50]
+        self.average_users_per_feature = [50, 50, 25, 25]
         self.n_learners=5
         self.quantity_estimator = QuantitiesEstimatorByFeatures(5, 4)
 
@@ -63,24 +63,27 @@ class ContextGenerator:
         self.splitted_features = []
 
         no_split_alphas = self.get_alphas_by_feature([(0,0), (0,1), (1,0), (1,1)])
-        reward_no_split = self.optimize(no_split_alphas, [(0,0), (0,1), (1,0), (1,1)])
+        print( "PPPPP", no_split_alphas.shape)
+
+        reward_no_split = self.optimize([no_split_alphas], [[(0,0), (0,1), (1,0), (1,1)]])
 
         # try split first feature
         first_feature_1 = self.get_alphas_by_feature([(0,0), (0,1)])
         first_feature_2 = self.get_alphas_by_feature([(1,0), (1,1)])
-        a = self.optimize(first_feature_1, [(0,0), (0,1)]) 
-        b = self.optimize(first_feature_2, [(1,0), (1,1)])
-        print("---a:", a, "--b:", b)
-        reward_first_feature = a + b
+        
+        # a = self.optimize(first_feature_1, [(0,0), (0,1)]) 
+        # b = self.optimize(first_feature_2, [(1,0), (1,1)])
+        # print("---a:", a, "--b:", b)
+        reward_first_feature = self.optimize([first_feature_1, first_feature_2], [[(0,0), (0,1)], [(1,0), (1,1)]])
 
 
         #try split second feature
         second_feature_1 = self.get_alphas_by_feature([(0,0), (1,0)])
         second_feature_2 = self.get_alphas_by_feature([(0,1), (1,1)])
-        a = self.optimize(second_feature_1, [(0,0), (1,0)]) 
-        b = self.optimize(second_feature_2, [(0,1), (1,1)])
-        print("22---a:", a, "--b:", b)
-        reward_second_feature = a + b
+        # a = self.optimize(second_feature_1, [(0,0), (1,0)]) 
+        # b = self.optimize(second_feature_2, [(0,1), (1,1)])
+        # print("22---a:", a, "--b:", b)
+        reward_second_feature = self.optimize([second_feature_1, second_feature_2], [[(0,0), (1,0)], [(0,1), (1,1)]])
 
         print("------ reward no split", reward_no_split, "Reward first feature", reward_first_feature, "Reward second feature", reward_second_feature)
         if reward_no_split > reward_first_feature and reward_no_split > reward_second_feature:
@@ -91,11 +94,11 @@ class ContextGenerator:
         elif reward_first_feature > reward_second_feature:
             
             # provo ulteriore split su feature 2
-            aggregate_1 = self.optimize(first_feature_1, [(0,0), (0,1)]) 
+            aggregate_1 = self.optimize([first_feature_1], [[(0,0), (0,1)]]) 
 
             set1 = self.get_alphas_by_feature([(0,0)])
             set2 = self.get_alphas_by_feature([(0,1)])
-            splitted_reward = self.optimize(set1, [(0,0)]) + self.optimize(set2, [(0,1)])
+            splitted_reward = self.optimize([set1, set2], [[(0,0)], [(0,1)]])
 
             print("------1st aggregate_1", aggregate_1, "splitted_reward", splitted_reward)
 
@@ -113,11 +116,11 @@ class ContextGenerator:
                 self.active_contexts.append(context)
                 self.splitted_features.append([(0,0), (0,1)])
 
-            aggregate_2 = self.optimize(first_feature_2, [(1,0), (1,1)])
+            aggregate_2 = self.optimize([first_feature_2], [[(1,0), (1,1)]])
             
             set1 = self.get_alphas_by_feature([(1,0)])
             set2 = self.get_alphas_by_feature([(1,1)])
-            splitted_reward = self.optimize(set1, [(1,0)]) + self.optimize(set2, [(1,1)])
+            splitted_reward = self.optimize([set1, set2], [[(1,0)], [(1,1)]])
 
             print("------1st aggregate_2", aggregate_2, "splitted_reward", splitted_reward)
 
@@ -136,11 +139,11 @@ class ContextGenerator:
 
         else:         
             # provo ulteriore split su feature 2
-            aggregate_1 = self.optimize(second_feature_1, [(0,0), (1,0)])
+            aggregate_1 = self.optimize([second_feature_1], [[(0,0), (1,0)]])
 
             set1 = self.get_alphas_by_feature([(0,0)])
             set2 = self.get_alphas_by_feature([(1,0)])
-            splitted_reward = self.optimize(set1, [(0,0)]) + self.optimize(set2, [(1,0)])
+            splitted_reward = self.optimize([set1, set2], [[(0,0)], [(1,0)]])
             print("------2nd aggregate_1", aggregate_1, "splitted_reward", splitted_reward)
 
             if aggregate_1 < splitted_reward:
@@ -156,11 +159,11 @@ class ContextGenerator:
                 self.active_contexts.append(context)
                 self.splitted_features.append([(0,0),(1,0)])
 
-            aggregate_2 = self.optimize(second_feature_2, [(0,1), (1,1)])
+            aggregate_2 = self.optimize([second_feature_2], [[(0,1), (1,1)]])
 
             set1 = self.get_alphas_by_feature([(0,1)])
             set2 = self.get_alphas_by_feature([(1,1)])
-            splitted_reward = self.optimize(set1, [(0,1)]) + self.optimize(set2, [(1,1)])
+            splitted_reward = self.optimize([set1, set2], [[(0,1)], [(1,1)]])
             print("------2nd aggregate_2", aggregate_2, "splitted_reward", splitted_reward)
 
             if aggregate_2 < splitted_reward:
@@ -198,40 +201,36 @@ class ContextGenerator:
 
         buy_probs = estimator.get_buy_probs()
 
-        class_features = self.translate_features(features)
-        user_number_per_feature = env.average_users_per_feature
 
-        users_to_divide = 0
-        total_users_in_context = 0
+        qtas = []
+        for features_group in features:
+            qta = np.zeros((len(features_group), 5))
+            for i, f in enumerate(features_group):
+                qta[i, :] = self.quantity_estimator.get_quantities_split(f)
+            qtas.append(qta)
 
-        for i, users_number in enumerate(user_number_per_feature):
-            if i not in class_features:
-                users_to_divide += users_number
-            elif i in class_features:
-                total_users_in_context += users_number
-
-        users = [0, 0, 0, 0]
-        for i, users_number in enumerate(user_number_per_feature):
-            if i in class_features:
-                users[i] = users_number #+ int(users_to_divide/total_users_in_context*users_number)
-            
+        real_alphas = np.zeros((self.n_arms, self.n_learners, len(features)))
+        for i in range(len(alphas)):
+            real_alphas[:, :, i] = (alphas[i])[:, :, 0]
 
 
         # print("TRADUZIONE", self.translate_features(features))
         optimizer = Optimizer(
-            users_number=env.average_users_per_feature,
+            users_number=env.configuration.average_users_number,
             min_budget=sim_configuration["min_budget"],
             max_budget=sim_configuration["max_budget"],
             total_budget=sim_configuration["total_budget"],
             resolution=sim_configuration["resolution"],
             products=env.products,
-            mean_quantities=self.quantity_estimator.get_quantities(features),
+            mean_quantities=qtas,#self.quantity_estimator.get_quantities(features),
             buy_probs=buy_probs,
-            alphas=alphas,
-            features_division=[self.translate_features(features)],
-            one_campaign_per_product=False
-                 
+            alphas=real_alphas,
+            features_division=translate_feature_group(features),#[self.translate_features(features)],
+            one_campaign_per_product=False,
+            multiple_quantities=True
         )
+        
+        # print(" ---- ", self.quantity_estimator.get_quantities_divided(features))
 
         optimizer.run_optimization()
         current_allocation, expected_profit = optimizer.find_best_allocation()
@@ -253,7 +252,8 @@ class ContextGenerator:
 
 
     def get_alphas_by_feature(self, features):
-
+        # print("------ FETAURES:", features)
+        total_users = 0
         gps = []
         alphas = np.zeros((self.n_arms, self.n_learners, 1))
         """
@@ -263,7 +263,7 @@ class ContextGenerator:
         """
 
         alpha = .5
-        kernel = C(10, constant_value_bounds="fixed") * RBF(5, length_scale_bounds="fixed")
+        kernel = C(5, constant_value_bounds="fixed") * RBF(20, length_scale_bounds="fixed")
 
         for i in range(self.n_learners):
             gp = GaussianProcessRegressor(
@@ -283,6 +283,7 @@ class ContextGenerator:
                 if user[3] in features and user[1] == i:
                     x.append(user[2] * self.get_users_in_context(features) / self.get_users_in_context([user[3]]))
                     y.append(user[0])
+                    total_users += 1
 
             x = np.atleast_2d(x).T
 
@@ -291,21 +292,21 @@ class ContextGenerator:
 
 
             mean, sigma = gp.predict(np.atleast_2d(self.arms).T, return_std=True)
-            lower_bound = mean-sigma*sigma
+            lower_bound = mean-sigma
 
             alphas[:, i, 0] = np.array(lower_bound)
 
 
             # x_pred = np.atleast_2d(self.arms).T
             # y_pred, sigma = gp.predict(x_pred, return_std=True)
-            # plt.figure(0)
+            # plt.figure("GP: "+str(i)+" FEATURES: "+str(features))
             # plt.ylim(-0.5, 1.5)
-            # plt.title(f'Iteration')
+            # plt.title("GP product: "+str(i)+" FEATURES: "+str(features))
             # plt.plot(x.ravel(), y, 'ro', label=r'Observed Clicks')
             # plt.plot(x_pred, y_pred, 'b-', label=r'Predicted clicks')
             # plt.fill(
             #     np.concatenate([x_pred, x_pred[::-1]]), 
-            #     np.concatenate([y_pred - 1.96 * sigma, (y_pred + 1.96 * sigma)[::-1]]),
+            #     np.concatenate([y_pred - 1.0* sigma, (y_pred + 1.0 * sigma)[::-1]]),
             #     alpha=.5, fc='b', ec='None', label='95% conf interval')
             # plt.xlabel('$x$')
             # plt.ylabel('$n(x)$')

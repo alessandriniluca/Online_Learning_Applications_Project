@@ -41,6 +41,7 @@ class Environment:
             self.configuration.average_users_number[2]/2
         ]
 
+
         logger.info("Environment initialized")
 
     def get_users_in_context(self, feature_list):
