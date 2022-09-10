@@ -263,7 +263,7 @@ class ContextGenerator:
         """
 
         alpha = .5
-        kernel = C(5, constant_value_bounds="fixed") * RBF(50, length_scale_bounds="fixed")
+        kernel = C(5, constant_value_bounds="fixed") * RBF(20, length_scale_bounds="fixed")
 
         for i in range(self.n_learners):
             gp = GaussianProcessRegressor(
@@ -292,7 +292,7 @@ class ContextGenerator:
 
 
             mean, sigma = gp.predict(np.atleast_2d(self.arms).T, return_std=True)
-            lower_bound = mean-sigma
+            lower_bound = np.clip(mean-sigma, 0, 1)
 
             alphas[:, i, 0] = np.array(lower_bound)
 
