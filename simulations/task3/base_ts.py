@@ -56,8 +56,8 @@ print(best_allocation, best_expected_profit)
 
 # Start simulation estimating alpha functions
 
-TIME_HORIZON = 40
-N_EXPERIMENTS = 10
+TIME_HORIZON = 10
+N_EXPERIMENTS = 2
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
@@ -164,6 +164,7 @@ save_data("task3_ts",
         "rounds": TIME_HORIZON,
         "regrets": mean_regret,
         "profits": mean_profit, 
+        "best_expected_profit": best_expected_profit,
         "regret_means": np.mean(mean_regret, axis=0).tolist(), 
         "profit_means": np.mean(mean_profit, axis=0).tolist(),
         "profit_means_std_dev": np.std(mean_profit, axis=0).tolist()
