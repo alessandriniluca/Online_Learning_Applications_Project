@@ -103,6 +103,8 @@ for experiment in range(N_EXPERIMENTS):
     regret = []
     estimator.update_graph_clicks(graph_estimator.get_estimated_graph())
 
+    print("-----*******-------- EXPERIMENT NUMBER: ", experiment)
+
     for round in range(TIME_HORIZON):
 
         #set probabilities
@@ -141,13 +143,16 @@ for i, e in enumerate(test_experiments):
 # print("REG:", mean_regret)
 # print("PROF:", mean_profit)
 save_data("task5_graph",
-    [
-    "experiments: "+str(N_EXPERIMENTS),
-    "rounds: "+str(TIME_HORIZON),
-    "regret", list(np.mean(mean_regret, axis=0)), 
-    "profit", list(np.mean(mean_profit, axis=0)),
-    "std_dev", list(np.std(mean_profit, axis=0))]
-    )
+    {
+        "experiments": N_EXPERIMENTS,
+        "rounds": TIME_HORIZON,
+        "regrets": mean_regret,
+        "profits": mean_profit, 
+        "regret_means": np.mean(mean_regret, axis=0).tolist(), 
+        "profit_means": np.mean(mean_profit, axis=0).tolist(),
+        "profit_means_std_dev": np.std(mean_profit, axis=0).tolist()
+    }
+)
 
 plt.figure(0)
 plt.ylim(-2, 35000)
