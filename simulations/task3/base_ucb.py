@@ -158,6 +158,7 @@ save_data("task3_ucb",
         "rounds": TIME_HORIZON,
         "regrets": mean_regret,
         "profits": mean_profit, 
+        "best_expected_profit": best_expected_profit,
         "regret_means": np.mean(mean_regret, axis=0).tolist(), 
         "profit_means": np.mean(mean_profit, axis=0).tolist(),
         "profit_means_std_dev": np.std(mean_profit, axis=0).tolist()
