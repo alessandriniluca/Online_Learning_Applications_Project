@@ -17,10 +17,10 @@ class GPUCB1_Learner(Learner):
         super().__init__(n_arms, name)
         self.arms = arms
         self.means = np.zeros(self.n_arms)
-        self.sigmas = np.ones(self.n_arms) * 8
+        self.sigmas = np.ones(self.n_arms) * 1.0
         self.pulled_arms = []
         alpha = .5
-        kernel = C(5, constant_value_bounds="fixed") * RBF(20, length_scale_bounds="fixed")
+        kernel = C(1, constant_value_bounds="fixed") * RBF(50, length_scale_bounds="fixed")
 
         # kernel = 1 * RBF(length_scale=2.0, length_scale_bounds=(1e-2, 1e2))
         self.gp = GaussianProcessRegressor(
@@ -53,7 +53,7 @@ class GPUCB1_Learner(Learner):
         self.means, self.sigmas = self.gp.predict(np.atleast_2d(self.arms).T, return_std=True)
 
         # sigma lower bound
-        self.sigmas = np.maximum(self.sigmas, 1e-2)
+        #self.sigmas = np.maximum(self.sigmas, 1e-2)
 
     def update(self, pulled_arm, reward):
         """
@@ -68,5 +68,15 @@ class GPUCB1_Learner(Learner):
         """
         Return expected rewards that will be provided to an optimizer to complete the combinatorial Bandit
         """
-        upper_bounds = self.means + self.sigmas
+        beta = np.sqrt(2*np.log2(self.n_arms*(self.t+1)*(self.t+1)*3.14*3.14/(6*0.05)))
+        # print("---- beta", beta, self.sigmas)
+        upper_bounds = self.means + beta*self.sigmas
+
+        for i in range(len(upper_bounds)):
+            if upper_bounds[i] > 1:
+                upper_bounds[i] = 1
+            elif upper_bounds[i] < 0:
+                upper_bounds[i] = 0
+        # print("----", self.means, self.sigmas)
+        # exit()
         return upper_bounds

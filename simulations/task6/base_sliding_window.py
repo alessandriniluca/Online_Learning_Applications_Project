@@ -36,7 +36,7 @@ buy_probs = estimator.get_buy_probs()
 
 
 TIME_HORIZON = 60
-N_EXPERIMENTS = 3
+N_EXPERIMENTS = 10
 N_CAMPAIGNS = 5
 CHANGE_FUNCTION_PERIOD = 30
 
