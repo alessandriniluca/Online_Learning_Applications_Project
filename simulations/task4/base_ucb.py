@@ -55,7 +55,7 @@ print(best_allocation)
 
 # Start simulation estimating alpha functions
 
-TIME_HORIZON = 45
+TIME_HORIZON = 48
 N_EXPERIMENTS = 10
 N_CAMPAIGNS = 5
 
@@ -80,6 +80,7 @@ for e in range(0, N_EXPERIMENTS):
     profits = []
     quantities = QuantitiesEstimator(env.products)
 
+    print("-----*******-------- EXPERIMENT NUMBER: ", e)
 
     for t in range(TIME_HORIZON):
         
@@ -156,13 +157,16 @@ for e in range(0, N_EXPERIMENTS):
 # print("REG:", mean_regret)
 # print("PROF:", mean_profit)
 save_data("task4_ucb",
-    [
-    "experiments: "+str(N_EXPERIMENTS),
-    "rounds: "+str(TIME_HORIZON),
-    "regret", list(np.mean(mean_regret, axis=0)), 
-    "profit", list(np.mean(mean_profit, axis=0)),
-    "std_dev", list(np.std(mean_profit, axis=0))]
-    )
+    {
+        "experiments": N_EXPERIMENTS,
+        "rounds": TIME_HORIZON,
+        "regrets": mean_regret,
+        "profits": mean_profit, 
+        "regret_means": np.mean(mean_regret, axis=0).tolist(), 
+        "profit_means": np.mean(mean_profit, axis=0).tolist(),
+        "profit_means_std_dev": np.std(mean_profit, axis=0).tolist()
+    }
+)
 
 plt.figure(0)
 plt.ylabel("Regret")

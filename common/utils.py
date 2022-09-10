@@ -165,10 +165,8 @@ class LearnerType(enum.Enum):
 def save_data(task_name, values):
     # ts stores the time in seconds
     ts = time.time()
-    ts = datetime.fromtimestamp(ts)
+    ts = datetime.fromtimestamp(ts).strftime("%Y-%m-%d-%H-%M-%S")
 
-    file_name = "results/result_"+str(task_name)+"_"+str(ts)+".txt"
-    with open(file_name, 'w') as f:
-        for value in values:
-            f.write(str(value))
-            f.write("\n")
+    file_name = "results/result_"+str(task_name)+"_"+str(ts)+".json"
+    with open(file_name, 'w') as file:
+        json.dump(values, file)

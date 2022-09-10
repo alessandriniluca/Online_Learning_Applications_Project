@@ -14,9 +14,9 @@ class GPUCBSlidingWindow(GPUCB1_Learner):
 
   def update_observations(self, arm_idx, reward):
     self.valid_rewards.append( (arm_idx, reward) )
-    for i in self.valid_rewards:
-      print("LUNGHEZZA", i[0], "-->", len(i[1]))
-    print("tot:", len(self.valid_rewards))
+    # for i in self.valid_rewards:
+    #   print("LUNGHEZZA", i[0], "-->", len(i[1]))
+    # print("tot:", len(self.valid_rewards))
 
 
   def update_model(self):

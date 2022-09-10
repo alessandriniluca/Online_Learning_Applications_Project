@@ -36,7 +36,7 @@ buy_probs = estimator.get_buy_probs()
 
 
 TIME_HORIZON = 60
-N_EXPERIMENTS = 3
+N_EXPERIMENTS = 10
 N_CAMPAIGNS = 5
 CHANGE_FUNCTION_PERIOD = 30
 
@@ -66,6 +66,8 @@ for e in range(0, N_EXPERIMENTS):
     )
     profits = []
     season = 0
+
+    print("-----*******-------- EXPERIMENT NUMBER: ", e)
 
     function_generator = AlphaFunctionGenerator()
 
@@ -175,13 +177,16 @@ for e in range(0, N_EXPERIMENTS):
 print(best_allocation_res)
 
 save_data("task6_sliding_window",
-    [
-    "experiments: "+str(N_EXPERIMENTS),
-    "rounds: "+str(TIME_HORIZON),
-    "regret", list(np.mean(mean_regret, axis=0)), 
-    "profit", list(np.mean(mean_profit, axis=0)),
-    "std_dev", list(np.std(mean_profit, axis=0))]
-    )
+    {
+        "experiments": N_EXPERIMENTS,
+        "rounds": TIME_HORIZON,
+        "regrets": mean_regret,
+        "profits": mean_profit, 
+        "regret_means": np.mean(mean_regret, axis=0).tolist(), 
+        "profit_means": np.mean(mean_profit, axis=0).tolist(),
+        "profit_means_std_dev": np.std(mean_profit, axis=0).tolist()
+    }
+)
 
 plt.figure(0)
 plt.ylabel("Regret")

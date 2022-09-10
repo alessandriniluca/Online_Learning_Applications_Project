@@ -57,9 +57,9 @@ class GPUCBChangeDetection(GPUCB1_Learner):
 
     for r in reward:
       self.update_observations(pulled_arm, r)
-    print("QQQ")
-    for i in self.valid_rewards:
-      print(len(i), end=" ")
-    print()
+    # print("QQQ")
+    # for i in self.valid_rewards:
+    #   print(len(i), end=" ")
+    # print()
     self.update_model()
   

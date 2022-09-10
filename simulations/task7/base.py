@@ -57,7 +57,7 @@ print(best_allocation, best_expected_profit)
 # Start simulation estimating alpha functions
 
 TIME_HORIZON = 50
-N_EXPERIMENTS = 1
+N_EXPERIMENTS = 5
 N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
@@ -82,11 +82,11 @@ for e in range(0, N_EXPERIMENTS):
     )
     profits = []
 
-    print("-----*******--------ROUND NUMERO: ", e)
+    print("-----*******-------- EXPERIMENT NUMBER: ", e)
 
     for t in range(TIME_HORIZON):
 
-        if t % 15 == 0 and t > 1:
+        if t % 14 == 0 and t > 1:
             context_generator.split()
         
         # Ask for estimations (get alpha primes)
@@ -179,13 +179,16 @@ for e in range(0, N_EXPERIMENTS):
 # print("PROF:", mean_profit)
 
 save_data("task7_classes",
-    [
-    "experiments: "+str(N_EXPERIMENTS),
-    "rounds: "+str(TIME_HORIZON),
-    "regret", list(np.mean(mean_regret, axis=0)), 
-    "profit", list(np.mean(mean_profit, axis=0)),
-    "std_dev", list(np.std(mean_profit, axis=0))]
-    )
+    {
+        "experiments": N_EXPERIMENTS,
+        "rounds": TIME_HORIZON,
+        "regrets": mean_regret,
+        "profits": mean_profit, 
+        "regret_means": np.mean(mean_regret, axis=0).tolist(), 
+        "profit_means": np.mean(mean_profit, axis=0).tolist(),
+        "profit_means_std_dev": np.std(mean_profit, axis=0).tolist()
+    }
+)
 
 
 plt.figure(0)

@@ -1,3 +1,4 @@
+from tkinter import E
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -68,6 +69,8 @@ for e in range(0, N_EXPERIMENTS):
     season = 0
 
     function_generator = AlphaFunctionGenerator()
+
+    print("-----*******-------- EXPERIMENT NUMBER: ", e)
 
     for t in range(TIME_HORIZON):
 
@@ -175,13 +178,16 @@ for e in range(0, N_EXPERIMENTS):
 print(best_allocation_res)
 
 save_data("task6_change_detection",
-    [
-    "experiments: "+str(N_EXPERIMENTS),
-    "rounds: "+str(TIME_HORIZON),
-    "regret", list(np.mean(mean_regret, axis=0)), 
-    "profit", list(np.mean(mean_profit, axis=0)),
-    "std_dev", list(np.std(mean_profit, axis=0))]
-    )
+    {
+        "experiments": N_EXPERIMENTS,
+        "rounds": TIME_HORIZON,
+        "regrets": mean_regret,
+        "profits": mean_profit, 
+        "regret_means": np.mean(mean_regret, axis=0).tolist(), 
+        "profit_means": np.mean(mean_profit, axis=0).tolist(),
+        "profit_means_std_dev": np.std(mean_profit, axis=0).tolist()
+    }
+)
 
 plt.figure(0)
 plt.ylabel("Regret")
