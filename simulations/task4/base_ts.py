@@ -109,6 +109,13 @@ for e in range(0, N_EXPERIMENTS):
         current_allocation, expected_profit = optimizer.find_best_allocation()
         print(current_allocation)
 
+
+        if round == 0:
+            sum = sim_configuration["max_budget"] + 10
+            while sum > sim_configuration["max_budget"]:
+                current_allocation = list(np.random.randint(20, size=5)*sim_configuration["resolution"])
+                sum = sum(current_allocation)
+
         # Compute Rewards from the environment
         round_users, total_users, round_profit = env.round(current_allocation)
 

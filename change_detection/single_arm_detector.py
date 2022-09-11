@@ -26,7 +26,9 @@ class SingleArmDetector:
 
     if self.t <= self.M:
       self.reference += sample/self.M
-      print("time:", self.t)
+      print("new arm REFERENCE: ", self.reference, "Sample:", sample, "used:", self.t)
+
+      # print("time:", self.t)
       return False
     else:
       self.reference = (self.reference*(self.t-1) + sample)/self.t
@@ -35,12 +37,14 @@ class SingleArmDetector:
 
       self.g_plus = max(0, self.g_plus + s_plus)
       self.g_minus = max(0, self.g_minus + s_minus)
+
       print("s_plus: ", s_plus, "s_min:", s_minus, "g min: ", self.g_minus, "g_plus:", self.g_plus, "h:", self.h, "time:", self.t)
       print("REFERENCE: ", self.reference, "Sample:", sample)
-
       if self.g_minus > self.h or self.g_plus > self.h:
+
         print("Reset done")
         self.reset()
+        #input()
         return True
       return False
 
