@@ -1,5 +1,5 @@
 {
-    "average_users_number": [50, 50, 50],
+    "average_users_number": [70, 70, 70],
     "std_users": [1, 1, 1],
     "basic_alphas": [[1, 1, 1, 1, 1, 120], [1, 1, 1, 1, 1, 90], [1, 1, 1, 1, 1, 100]],
     "products_parameters" : [
