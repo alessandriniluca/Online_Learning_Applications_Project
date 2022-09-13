@@ -53,6 +53,8 @@ elif task == 6:
         import simulations.task6.base_change_detection
     elif type == "sliding_window":
         import simulations.task6.base_sliding_window
+    elif type == "change_detection_discard_all":
+        import simulations.task6.base_change_detection_discard_all
     else:
         print("It could only be: \"change_detection\" or \"sliding_window\"")
 elif task == 7:
