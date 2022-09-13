@@ -29,7 +29,8 @@ def compute_alphas_prime(total_budget,
                 if one_per_product:
                     budgets[product_index] = single_budget / sum(average_users_number) * users_of_current_class
                 else:
-                    budgets[product_index] = single_budget
+                    if class_index > 1:
+                        budgets[product_index] = single_budget / 2
 
                 # compute deltas of weights
 
