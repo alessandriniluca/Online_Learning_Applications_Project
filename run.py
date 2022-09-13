@@ -41,7 +41,20 @@ elif task == 4:
     else:
         print("It could only be: \"UCB\" or \"TS\"")
 elif task == 5:
-    import simulations.task5.base
+    if len(sys.argv) <= 2:
+        print("This task need to specify if ALL or UCB or TS")
+        print(" ")
+        print("Example for task 5 UCB use: python3 run.py 5 UCB")
+        print(" ")
+    type = sys.argv[2]
+    if type == "ALL":
+        import simulations.task5.base
+    elif type == "UCB":
+        import simulations.task5.base_ucb
+    elif type == "TS":
+        import simulations.task5.base_ts
+    else:
+        print("Error name - errore!!!")
 elif task == 6:
     if len(sys.argv) <= 2:
         print("This task need to specify if change_detection or sliding_window")

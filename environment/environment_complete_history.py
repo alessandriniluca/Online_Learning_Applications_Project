@@ -153,7 +153,7 @@ class EnvironmentCompleteHistory(Environment):
         # update history
         self.users_per_round.append(this_round_users)
 
-        return users_history, this_round_profit
+        return users_history, this_round_profit, this_round_users, sum(total_number_users)
 
     # def set_graph_estimation(self, estimation):
     #     self.estimated_graph_clicks = estimation

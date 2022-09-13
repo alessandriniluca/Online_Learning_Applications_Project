@@ -1,7 +1,8 @@
 import numpy as np
 
 from matplotlib import pyplot as plt
-from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions, save_data
+from bandits.multi_learner import MultiLearner
+from common.utils import LearnerType, load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions, save_data
 from environment.configuration import Configuration
 from environment.environment import Environment
 from environment.environment_complete_history import EnvironmentCompleteHistory
@@ -61,9 +62,9 @@ print(best_allocation)
 
 
 ######################
-
-TIME_HORIZON = 150
-N_EXPERIMENTS = 5
+TIME_HORIZON = 35
+N_EXPERIMENTS = 10
+N_CAMPAIGNS = 5
 test_experiments = []
 
 env = EnvironmentCompleteHistory(
@@ -98,11 +99,16 @@ optimizer = FullOptimizer(
 mean_profit = []
 mean_regret = []
 
+n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
+budgets = np.linspace(0, sim_configuration["total_budget"], n_arms)
+
 for experiment in range(N_EXPERIMENTS):
     profit = []
     regret = []
-    estimator.update_graph_clicks(graph_estimator.get_estimated_graph())
 
+    gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
+    estimator.update_graph_clicks(graph_estimator.get_estimated_graph())
+    print("EEE", estimator.get_buy_probs())
     print("-----*******-------- EXPERIMENT NUMBER: ", experiment)
 
     for round in range(TIME_HORIZON):
@@ -110,18 +116,65 @@ for experiment in range(N_EXPERIMENTS):
         #set probabilities
         buy_probs = estimator.get_buy_probs()
         optimizer.set_buy_probabilities(buy_probs)
+        ucb_alpha_prime = gpucb_learners.get_expected_rewards()
+
+
+
+        optimizer = Optimizer(
+            users_number=env.configuration.average_users_number,
+            min_budget=sim_configuration["min_budget"],
+            max_budget=sim_configuration["max_budget"],
+            total_budget=sim_configuration["total_budget"],
+            resolution=sim_configuration["resolution"],
+            products=env.products,
+            mean_quantities=env.configuration.quantity_means,
+            buy_probs=buy_probs,
+            alphas=ucb_alpha_prime,
+            one_campaign_per_product=True
+        )
 
         #Optimize with probabilities calculated
         optimizer.one_campaign_per_product = True
         optimizer.run_optimization()
-        best_allocation, expected_earning = optimizer.find_best_allocation()
+        current_allocation, expected_earning = optimizer.find_best_allocation()
+        print(current_allocation)
+
         # end of optimization
         # perform the round and get the history of the users
-        users_history, round_profit, _, _ = env.round(best_allocation)
+        users_history, round_profit, round_users, total_users = env.round(current_allocation)
         # Update graph probabilities according to users history
         graph_estimator.update_graph_probabilities(users_history)
         estimator.update_graph_clicks(graph_estimator.get_estimated_graph())
-        print(best_allocation)
+        print(current_allocation)
+
+        rewards = [[], [], [], [], []]
+        for user in round_users:
+            # compute the rewards
+            for reward_index, reward in enumerate(rewards):
+                # if the index match reward is 1
+                if reward_index == user.starting_product:
+                    reward.append(1)
+                # otherwise zero
+                else:
+                    reward.append(0)
+        print(total_users)
+        print(len(round_users))
+        # Array with one zero for each lost customer
+        lost_users_reward = np.zeros(total_users - len(round_users))
+        # fill the rewards to compensate lost users
+        for i in range(len(rewards)):
+            rewards[i] = np.concatenate((rewards[i], lost_users_reward))
+
+        # compute index of arm played
+        # TODO this could be prevented making update method work also with value (not only index)
+        arm_indexes = []
+        for allocation in current_allocation:
+            arm_indexes.append(np.where(budgets == allocation)[0][0])
+
+        # update the learners
+        # print("INDICE::::", arm_indexes)
+        # print("Rewards:::", rewards)
+        gpucb_learners.update(arm_indexes, rewards)
 
         profit.append(round_profit)
         regret.append(best_expected_profit - round_profit)
@@ -156,7 +209,6 @@ save_data("task5_graph",
 )
 
 plt.figure(0)
-plt.ylim(-2, 35000)
 plt.ylabel("Regret")
 plt.xlabel("t")
 plt.plot(np.mean(mean_regret, axis=0), 'r')
@@ -165,7 +217,6 @@ plt.legend(["REGRET"])
 plt.show()
 
 plt.figure(1)
-plt.ylim(-2, 35000)
 plt.ylabel("Profit")
 plt.xlabel("t")
 plt.plot(np.mean(mean_profit, axis=0), 'g')
