@@ -81,19 +81,20 @@ class Environment:
             temp_budget.append(budget_per_class)
 
         # Trick per unire i budget destinati a features 10 e 11 che appartengono alla stessa classe
-        for j in range(len(self.products)):
-            temp_budget[2][j] += temp_budget[3][j]
-        budget = temp_budget[:3]
+        budget = temp_budget
 
 
         delta_increment = []
+        self.alphas_functions = [self.alphas_functions[0], self.alphas_functions[1], self.alphas_functions[2], self.alphas_functions[2]]
         for i, function in enumerate(self.alphas_functions):
             delta_increment.append(np.concatenate((function(budget[i]), np.array([0]))))
+            
 
         logger.debug("Delta increments: " + str(delta_increment))
 
 
         # Compute new weights
+        self.configuration.basic_alphas = [self.configuration.basic_alphas[0], self.configuration.basic_alphas[1], self.configuration.basic_alphas[2], self.configuration.basic_alphas[2]]
         new_weights = self.configuration.basic_alphas + np.array(delta_increment)
 
         # Now make sure that the previous sum of weights is the same of the new one
@@ -105,15 +106,18 @@ class Environment:
         
         # Sample alphas for this round from dirichlet distributions
         actual_alpha = np.array([])
+        print(new_weights, len(new_weights))
         for i in range(len(new_weights)):
             actual_alpha = np.concatenate(
-                (actual_alpha, np.random.dirichlet(new_weights[i])), axis=0)
-        actual_alpha = actual_alpha.reshape(3, 6)
+                (actual_alpha, np.random.multinomial(self.average_users_per_feature[i], new_weights[i]/sum(new_weights[i]))), axis=0)
+        
+        actual_alpha = actual_alpha.astype(int)
+        actual_alpha = actual_alpha.reshape(4, 6)
 
         logger.debug("Alpha ratios: " + str(actual_alpha))
 
         # Apply alpha ratios to all users
-        users_per_category = (actual_alpha * n_users[:, np.newaxis]).astype(int)
+        users_per_category = actual_alpha# (actual_alpha * n_users[:, np.newaxis]).astype(int)
 
         users_per_category_copy = users_per_category.copy()
 
@@ -127,21 +131,21 @@ class Environment:
         # instantiate all users for this round
         this_round_users = []
         this_round_profit = 0
-        for class_index in range(len(users_per_category)):
+        for class_index in range(len(self.average_users_per_feature)):
             for start_product_index in range(len(users_per_category[class_index])):
                 for _ in range(users_per_category[class_index][start_product_index]):
 
                     # instantiate user of class (class_index) that starts from product (primary_product_index)
                     user = User(
-                        self.configuration.reservation_price_means[class_index],
-                        self.configuration.reservation_price_std_dev[class_index],
-                        self.configuration.quantity_means[class_index],
-                        self.configuration.quantity_std_dev[class_index],
-                        user_class=class_index,
+                        self.configuration.reservation_price_means[min(class_index, 2)],
+                        self.configuration.reservation_price_std_dev[min(class_index, 2)],
+                        self.configuration.quantity_means[min(class_index, 2)],
+                        self.configuration.quantity_std_dev[min(class_index, 2)],
+                        user_class=min(class_index, 2),
                         # Note that we will have an effective split on feature 0
                         # The split of feature 1 instead will be performed only after seeing feature 0 == 0
                         features=(0, 0) if class_index == 0 else (
-                            (0, 1) if class_index == 1 else ((1, 1) if np.random.uniform(0, 1) < 0.5 else (1, 0))),
+                            (0, 1) if class_index == 1 else ((1, 0) if class_index == 2 else (1, 1))),
                         starting_product=start_product_index,
                         # Make a copy of the graph for each user, since exploration will change graph probabilities
                         graph_clicks=self.configuration.graph_clicks.copy()
@@ -200,4 +204,4 @@ class Environment:
         #     uno_zero = 1
         #     uno_uno = 1
 
-        return this_round_users, users_per_category_copy[0][5], users_per_category_copy[1][5], int(users_per_category_copy[2][5]/2), int(users_per_category_copy[2][5]/2), this_round_profit
+        return this_round_users, users_per_category_copy[0][5], users_per_category_copy[1][5], users_per_category_copy[2][5], users_per_category_copy[3][5], this_round_profit
