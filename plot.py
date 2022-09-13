@@ -21,7 +21,7 @@ result_data = json.load(json_file)
 mean_profit = np.array(result_data['profit_means'])
 mean_profit_std_dev = np.array(result_data['profit_means_std_dev'])
 mean_regret = np.array(result_data['regret_means'])
-best_expected_profit = result_data['best_expected_profit']
+best_expected_profit = mean_profit + mean_regret #result_data['best_expected_profit']
 TIME_HORIZON = result_data['rounds']
 
 
@@ -56,7 +56,7 @@ plt.figure(1)
 plt.ylabel("Profit")
 plt.xlabel("t")
 plt.plot(mean_profit, 'g')
-plt.axhline(y=best_expected_profit, color='b', linestyle='-')
+plt.plot(best_expected_profit, 'b')
 
 x = np.linspace(0, TIME_HORIZON-1, TIME_HORIZON)
 

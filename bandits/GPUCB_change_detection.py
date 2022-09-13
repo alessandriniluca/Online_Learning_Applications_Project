@@ -42,7 +42,7 @@ class GPUCBChangeDetection(GPUCB1_Learner):
     self.means, self.sigmas = self.gp.predict(np.atleast_2d(self.arms).T, return_std=True)
 
     # sigma lower bound
-    self.sigmas = np.maximum(self.sigmas, 1e-2)
+    # self.sigmas = np.maximum(self.sigmas, 1e-2)
     # except:
       # print("----No elements-----")
 
@@ -63,3 +63,19 @@ class GPUCBChangeDetection(GPUCB1_Learner):
     # print()
     self.update_model()
   
+
+  def get_expected_rewards(self):
+    """
+    Return expected rewards that will be provided to an optimizer to complete the combinatorial Bandit
+    """
+    beta = np.sqrt(2*np.log2(self.n_arms*(self.t+1)*(self.t+1)*3.14*3.14/(6*0.05)))
+    # print("---- beta", beta, self.sigmas)
+    upper_bounds = self.means + beta*self.sigmas
+
+    for i in range(len(upper_bounds)):
+        if upper_bounds[i] > 1:
+            upper_bounds[i] = 1
+        elif upper_bounds[i] < 0:
+            upper_bounds[i] = 0
+
+    return upper_bounds
