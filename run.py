@@ -57,7 +57,7 @@ elif task == 5:
         print("Error name - errore!!!")
 elif task == 6:
     if len(sys.argv) <= 2:
-        print("This task need to specify if change_detection or sliding_window")
+        print("This task need to specify if change_detection or change_detection_discard_all or sliding_window")
         print(" ")
         print("Example for task 6 with Change Detection use: python3 run.py 6 change_detection")
         print(" ")
@@ -69,7 +69,7 @@ elif task == 6:
     elif type == "change_detection_discard_all":
         import simulations.task6.base_change_detection_discard_all
     else:
-        print("It could only be: \"change_detection\" or \"sliding_window\"")
+        print("It could only be: \"change_detection\" or \"change_detection_discard_all\" or \"sliding_window\"")
 elif task == 7:
     import simulations.task7.base
 else:

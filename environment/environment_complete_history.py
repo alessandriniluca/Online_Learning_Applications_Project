@@ -72,7 +72,7 @@ class EnvironmentCompleteHistory(Environment):
         logger.debug("Alpha ratios: " + str(actual_alpha))
 
         # Apply alpha ratios to all users
-        users_per_category = (actual_alpha * n_users[:, np.newaxis]).astype(int)
+        users_per_category = np.round(actual_alpha * n_users[:, np.newaxis]).astype(int)
         total_number_users = sum(users_per_category)
         logger.debug("Users per category " + str(users_per_category))
         logger.debug("Sum: " + str(sum(total_number_users)))

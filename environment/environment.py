@@ -87,6 +87,15 @@ class Environment:
                 raise ValueError("Delta increment exceeding alpha zero weights")
             new_weights[class_index][5] -= sum(delta_increment[class_index])
         
+        # Sample alphas for this round from multinomial distributions
+        # actual_alpha = np.array([])
+        # for i in range(len(new_weights)):
+        #     actual_alpha = np.concatenate(
+        #         (actual_alpha, np.random.multinomial(self.configuration.average_users_number[i], new_weights[i]/sum(new_weights[i]))), axis=0)
+        # actual_alpha = (actual_alpha.astype(int)).reshape(3, 6)
+        
+        # users_per_category = actual_alpha
+
         # Sample alphas for this round from dirichlet distributions
         actual_alpha = np.array([])
         for i in range(len(new_weights)):
@@ -94,10 +103,12 @@ class Environment:
                 (actual_alpha, np.random.dirichlet(new_weights[i])), axis=0)
         actual_alpha = actual_alpha.reshape(3, 6)
 
+        users_per_category = np.round(actual_alpha * n_users[:, np.newaxis]).astype(int)
+
+
         logger.debug("Alpha ratios: " + str(actual_alpha))
 
         # Apply alpha ratios to all users
-        users_per_category = (actual_alpha * n_users[:, np.newaxis]).astype(int)
         total_number_users = sum(users_per_category)
         logger.debug("Users per category " + str(users_per_category))
         logger.debug("Sum: " + str(sum(total_number_users)))
