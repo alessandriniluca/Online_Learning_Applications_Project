@@ -12,7 +12,6 @@ from probability_calculator.quantities_estimator_by_feature import QuantitiesEst
 from matplotlib import pyplot as plt
 
 
-
 class ContextGenerator:
 
     def __init__(self, n_arms, arms, learner_type, user_division):
@@ -286,34 +285,48 @@ class ContextGenerator:
                     total_users += 1
 
             x = np.atleast_2d(x).T
-
+            
             # Retrain the GP
             gp.fit(x, y)
 
 
             mean, sigma = gp.predict(np.atleast_2d(self.arms).T, return_std=True)
-            lower_bound = np.clip(mean-sigma, 0, 1)
+
+            massimo = max(x)
+            
+            # print(x, mean, massimo, len(mean))
+            
+            for j, a in enumerate(self.arms):
+                if a > massimo:
+                    mean[j] = 0
+
+            lower_bound = mean - sigma
+            lower_bound = np.clip(lower_bound, 0, 1)
 
             alphas[:, i, 0] = np.array(lower_bound)
 
 
-            # x_pred = np.atleast_2d(self.arms).T
-            # y_pred, sigma = gp.predict(x_pred, return_std=True)
-            # plt.figure("GP: "+str(i)+" FEATURES: "+str(features))
-            # plt.ylim(-0.5, 1.5)
-            # plt.title("GP product: "+str(i)+" FEATURES: "+str(features))
-            # plt.plot(x.ravel(), y, 'ro', label=r'Observed Clicks')
-            # plt.plot(x_pred, y_pred, 'b-', label=r'Predicted clicks')
-            # plt.fill(
-            #     np.concatenate([x_pred, x_pred[::-1]]), 
-            #     np.concatenate([y_pred - 1.0* sigma, (y_pred + 1.0 * sigma)[::-1]]),
-            #     alpha=.5, fc='b', ec='None', label='95% conf interval')
-            # plt.xlabel('$x$')
-            # plt.ylabel('$n(x)$')
-            # plt.legend(loc='lower right')
-            # plt.show()
+        #     x_pred = np.atleast_2d(self.arms).T
+        #     y_pred = mean
 
+        #     plt.figure("GP: "+str(i)+" FEATURES: "+str(features))
+        #     plt.ylim(-0.5, 1.5)
+        #     plt.title("GP product: "+str(i)+" FEATURES: "+str(features))
+        #     plt.plot(x.ravel(), y, 'ro', label=r'Observed Clicks')
+        #     plt.plot(x_pred, y_pred, 'b-', label=r'Predicted clicks')
+        #     plt.fill(
+        #         np.concatenate([x_pred, x_pred[::-1]]), 
+        #         np.concatenate([y_pred - 1.0* sigma, (y_pred + 1.0 * sigma)[::-1]]),
+        #         alpha=.5, fc='b', ec='None', label='95% conf interval')
+        #     plt.xlabel('$x$')
+        #     plt.ylabel('$n(x)$')
+        #     plt.legend(loc='lower right')
         
+        # plt.show(block=False)
+
+        # input("mmmmmm")
+        
+        # plt.close('all')
 
         return alphas
             

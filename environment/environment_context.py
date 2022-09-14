@@ -50,6 +50,28 @@ class Environment:
             tot += self.average_users_per_feature[feature]
         return tot
 
+    def calculate_feature_last_class(self, four_split_budget, start_product_index):
+        num = 0
+        den = 0
+        if start_product_index < 5:
+            num = four_split_budget[2][start_product_index]
+            den = four_split_budget[2][start_product_index] + four_split_budget[3][start_product_index]
+        else:
+            num = sum(four_split_budget[2])
+            den = sum(four_split_budget[2]) + sum(four_split_budget[3])
+
+        p10 = 0.5
+        if den != 0:
+            p10 =  num / den
+        
+        # print(start_product_index, " --- ", p10)
+
+        if np.random.uniform(0, 1) < p10:
+            return (1,0) if start_product_index < 5 else (1, 1)
+        else:
+            return (1, 1) if start_product_index < 5 else (1, 0)
+
+
     def round(self, budget, feature_division):
         """
         Simulate a round given a budget allocation
@@ -79,7 +101,9 @@ class Environment:
                         budget_per_class[j] += b[j]/users_in_context*users_with_specific_features
 
             temp_budget.append(budget_per_class)
-
+        
+        four_split_budget = temp_budget.copy()
+        
         # Trick per unire i budget destinati a features 10 e 11 che appartengono alla stessa classe
         for j in range(len(self.products)):
             temp_budget[2][j] += temp_budget[3][j]
@@ -113,7 +137,7 @@ class Environment:
         logger.debug("Alpha ratios: " + str(actual_alpha))
 
         # Apply alpha ratios to all users
-        users_per_category = (actual_alpha * n_users[:, np.newaxis]).astype(int)
+        users_per_category = np.round(actual_alpha * n_users[:, np.newaxis]).astype(int)
 
         users_per_category_copy = users_per_category.copy()
 
@@ -122,10 +146,12 @@ class Environment:
         logger.debug("Sum: " + str(sum(total_number_users)))
 
         # discard alpha_0, user that visit competitor's website
-        users_per_category = (users_per_category[:, :5])
+        # users_per_category = (users_per_category[:, :5])
 
         # instantiate all users for this round
         this_round_users = []
+        gone_10 = 0
+        gone_11 = 0
         this_round_profit = 0
         for class_index in range(len(users_per_category)):
             for start_product_index in range(len(users_per_category[class_index])):
@@ -141,11 +167,18 @@ class Environment:
                         # Note that we will have an effective split on feature 0
                         # The split of feature 1 instead will be performed only after seeing feature 0 == 0
                         features=(0, 0) if class_index == 0 else (
-                            (0, 1) if class_index == 1 else ((1, 1) if np.random.uniform(0, 1) < 0.5 else (1, 0))),
+                            (0, 1) if class_index == 1 else self.calculate_feature_last_class(four_split_budget, start_product_index)), #((1, 1) if np.random.uniform(0, 1) < 0.5 else (1, 0))),
                         starting_product=start_product_index,
                         # Make a copy of the graph for each user, since exploration will change graph probabilities
                         graph_clicks=self.configuration.graph_clicks.copy()
                     )
+
+                    if start_product_index > 4:
+                        if user.features == (1,0):
+                            gone_10 +=1
+                        elif user.features == (1,1):
+                            gone_11 +=1
+                        continue
 
                     this_round_users.append(user)
 
@@ -200,4 +233,4 @@ class Environment:
         #     uno_zero = 1
         #     uno_uno = 1
 
-        return this_round_users, users_per_category_copy[0][5], users_per_category_copy[1][5], int(users_per_category_copy[2][5]/2), int(users_per_category_copy[2][5]/2), this_round_profit
+        return this_round_users, users_per_category_copy[0][5], users_per_category_copy[1][5], int(gone_10), int(gone_11), this_round_profit
