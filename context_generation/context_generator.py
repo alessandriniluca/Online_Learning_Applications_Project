@@ -249,6 +249,10 @@ class ContextGenerator:
             for product, quantity in user.bought_product:
                 self.quantity_estimator.add_quantity(product.number, user.features, quantity)
 
+    def unison_shuffled_copies(self, a, b):
+        assert len(a) == len(b)
+        p = np.random.permutation(len(a))
+        return a[p], b[p]
 
     def get_alphas_by_feature(self, features):
         # plot_mabs = input("PLOT MABS? 1 or 0 : ")
@@ -268,7 +272,12 @@ class ContextGenerator:
         """
 
         alpha = .5
-        kernel = C(5, constant_value_bounds="fixed") * RBF(50, length_scale_bounds="fixed")
+        # kernel = C(5) * RBF(50)
+        kernel = C(10, constant_value_bounds="fixed") * RationalQuadratic(length_scale=20, alpha=100, length_scale_bounds="fixed", alpha_bounds="fixed")
+                # * Matern(length_scale=40,length_scale_bounds="fixed", nu=2.5)
+                # * RBF(length_scale=50, length_scale_bounds="fixed")
+                
+                # + WhiteKernel(noise_level=1, noise_level_bounds="fixed")
 
         for i in range(self.n_learners):
             gp = GaussianProcessRegressor(
@@ -293,8 +302,11 @@ class ContextGenerator:
                         total_users += 1
 
             x = np.atleast_2d(x).T
-            
+            y = np.array(y)
+
+            x, y = self.unison_shuffled_copies(x, y)
             # Retrain the GP
+            
             gp.fit(x, y)
 
 

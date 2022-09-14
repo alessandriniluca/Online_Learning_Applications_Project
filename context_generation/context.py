@@ -4,6 +4,10 @@ from bandits.multi_learner import MultiLearner
 from probability_calculator.quantities_estimator import QuantitiesEstimator
 
 class Context:
+    def unison_shuffled_copies(self, a, b):
+            assert len(a) == len(b)
+            p = np.random.permutation(len(a))
+            return a[p], b[p]
 
     def __init__(self, average_users_per_feature, quantity_estimator, rewards_per_feature, n_arms, budgets, learner_type, n_learners, features):
         self.rewards_per_feature = rewards_per_feature
@@ -44,6 +48,14 @@ class Context:
                         if bud <= 100:
                             x.append(bud)
                             y.append(user[0])
+
+                x = np.array(x)
+                y = np.array(y)
+
+                x, y = self.unison_shuffled_copies(x, y)
+
+                x = x.tolist()
+                y = y.tolist()
 
                 if not (len(x) == 0 or len(y) == 0):
                     # x = np.atleast_2d(x).T
