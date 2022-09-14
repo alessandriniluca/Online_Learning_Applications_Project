@@ -70,13 +70,8 @@ class GPUCB1_Learner(Learner):
         """
         beta = np.sqrt(2*np.log2(self.n_arms*(self.t+1)*(self.t+1)*3.14*3.14/(6*0.05)))
         # print("---- beta", beta, self.sigmas)
-        upper_bounds = self.means + beta*self.sigmas
+        upper_bounds = self.means + beta * self.sigmas
 
-        for i in range(len(upper_bounds)):
-            if upper_bounds[i] > 1:
-                upper_bounds[i] = 1
-            elif upper_bounds[i] < 0:
-                upper_bounds[i] = 0
-        # print("----", self.means, self.sigmas)
-        # exit()
+        upper_bounds = np.clip(upper_bounds, 0, 1)
+
         return upper_bounds
