@@ -37,10 +37,14 @@ class Context:
             for i in range(self.n_learners):
                 x = []
                 y = []
+
                 for user in self.rewards_per_feature:
                     if user[3] in self.features and user[1] == i:
-                        x.append(user[2] * self.get_users_in_context(self.features) / self.get_users_in_context([user[3]]))
-                        y.append(user[0])
+                        bud = user[2] * self.get_users_in_context(self.features) / self.get_users_in_context([user[3]])
+                        if bud <= 100:
+                            x.append(bud)
+                            y.append(user[0])
+
                 if not (len(x) == 0 or len(y) == 0):
                     # x = np.atleast_2d(x).T
                     self.mab.update_single(i, x, y)

@@ -1,16 +1,22 @@
+from ast import If
 from unittest import result
 import numpy as np
 from matplotlib import pyplot as plt
 import sys
 import json
 
-if len(sys.argv) <= 2:
+if len(sys.argv) < 3:
     print("USAGE: ")
     print("python3 run.py <result_json> <title>")
     print(" ")
     print("Example task 3 with UCB: python3 run.py results/task_3_ucb.json \"TASK 3 UCB\"")
     print(" ")
     exit(1)
+
+context = False
+if len(sys.argv) > 3:
+    if sys.argv[3] == "CONTEXT":
+            context = True
 
 json_filename = sys.argv[1]
 title = sys.argv[2]
@@ -62,8 +68,14 @@ x = np.linspace(0, TIME_HORIZON-1, TIME_HORIZON)
 
 plt.fill_between(x, mean_profit - mean_profit_std_dev, mean_profit + mean_profit_std_dev, color='C0', alpha=0.2)
 
+if context:
+    for i in range(len(mean_profit)):
+        if i % 14 == 0:
+            plt.axvline(x=i, color='r')
 
-plt.legend(["PROFIT", "CLAIRVOYANT AVG", "PROFIT STD DEV"])
+    plt.legend(["PROFIT", "CLAIRVOYANT AVG", "PROFIT STD DEV", "CONTEXT SPLIT"])
+else:
+    plt.legend(["PROFIT", "CLAIRVOYANT AVG", "PROFIT STD DEV"])
 
 plt.title(title + "\nREWARD PLOT and CLAIRVOYANT PLOT")
 

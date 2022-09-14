@@ -251,6 +251,12 @@ class ContextGenerator:
 
 
     def get_alphas_by_feature(self, features):
+        # plot_mabs = input("PLOT MABS? 1 or 0 : ")
+        # if plot_mabs != "1":
+        #     plot_mabs = False
+        # else:
+        #     plot_mabs = True
+
         # print("------ FETAURES:", features)
         total_users = 0
         gps = []
@@ -262,7 +268,7 @@ class ContextGenerator:
         """
 
         alpha = .5
-        kernel = C(5, constant_value_bounds="fixed") * RBF(20, length_scale_bounds="fixed")
+        kernel = C(5, constant_value_bounds="fixed") * RBF(50, length_scale_bounds="fixed")
 
         for i in range(self.n_learners):
             gp = GaussianProcessRegressor(
@@ -280,9 +286,11 @@ class ContextGenerator:
 
             for user in self.rewards_per_feature:
                 if user[3] in features and user[1] == i:
-                    x.append(user[2] * self.get_users_in_context(features) / self.get_users_in_context([user[3]]))
-                    y.append(user[0])
-                    total_users += 1
+                    bud = user[2] * self.get_users_in_context(features) / self.get_users_in_context([user[3]])
+                    if bud <= 100:
+                        x.append(bud)
+                        y.append(user[0])
+                        total_users += 1
 
             x = np.atleast_2d(x).T
             
@@ -305,28 +313,29 @@ class ContextGenerator:
 
             alphas[:, i, 0] = np.array(lower_bound)
 
+        #     if plot_mabs:
+        #         x_pred = np.atleast_2d(self.arms).T
+        #         y_pred = mean
 
-        #     x_pred = np.atleast_2d(self.arms).T
-        #     y_pred = mean
-
-        #     plt.figure("GP: "+str(i)+" FEATURES: "+str(features))
-        #     plt.ylim(-0.5, 1.5)
-        #     plt.title("GP product: "+str(i)+" FEATURES: "+str(features))
-        #     plt.plot(x.ravel(), y, 'ro', label=r'Observed Clicks')
-        #     plt.plot(x_pred, y_pred, 'b-', label=r'Predicted clicks')
-        #     plt.fill(
-        #         np.concatenate([x_pred, x_pred[::-1]]), 
-        #         np.concatenate([y_pred - 1.0* sigma, (y_pred + 1.0 * sigma)[::-1]]),
-        #         alpha=.5, fc='b', ec='None', label='95% conf interval')
-        #     plt.xlabel('$x$')
-        #     plt.ylabel('$n(x)$')
-        #     plt.legend(loc='lower right')
+        #         plt.figure("GP: "+str(i)+" FEATURES: "+str(features))
+        #         plt.ylim(-0.5, 1.5)
+        #         plt.title("GP product: "+str(i)+" FEATURES: "+str(features))
+        #         plt.plot(x.ravel(), y, 'ro', label=r'Observed Clicks')
+        #         plt.plot(x_pred, y_pred, 'b-', label=r'Predicted clicks')
+        #         plt.fill(
+        #             np.concatenate([x_pred, x_pred[::-1]]), 
+        #             np.concatenate([y_pred - 1.0* sigma, (y_pred + 1.0 * sigma)[::-1]]),
+        #             alpha=.5, fc='b', ec='None', label='95% conf interval')
+        #         plt.xlabel('$x$')
+        #         plt.ylabel('$n(x)$')
+        #         plt.legend(loc='lower right')
         
-        # plt.show(block=False)
+        # if plot_mabs:
+        #     plt.show(block=False)
 
-        # input("mmmmmm")
-        
-        # plt.close('all')
+        #     input("mmmmmm")
+            
+        #     plt.close('all')
 
         return alphas
             
