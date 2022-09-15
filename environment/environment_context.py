@@ -6,6 +6,8 @@ from environment.user import User
 import numpy as np
 import random
 
+from copy import deepcopy
+
 logger = get_logger(__name__)
 
 
@@ -102,8 +104,7 @@ class Environment:
 
             temp_budget.append(budget_per_class)
         
-        four_split_budget = temp_budget.copy()
-        
+        four_split_budget = deepcopy(temp_budget)
         # Trick per unire i budget destinati a features 10 e 11 che appartengono alla stessa classe
         for j in range(len(self.products)):
             temp_budget[2][j] += temp_budget[3][j]
