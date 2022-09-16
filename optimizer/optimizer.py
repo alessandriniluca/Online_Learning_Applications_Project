@@ -27,7 +27,7 @@ class Optimizer:
                  products,
                  mean_quantities,
                  buy_probs,
-                 alphas,
+                 alphas=np.array([]),
                  one_campaign_per_product=False):
         self.users_number = users_number
         self.min_budget = min_budget

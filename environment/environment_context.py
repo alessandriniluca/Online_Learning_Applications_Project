@@ -66,7 +66,7 @@ class Environment:
         if den != 0:
             p10 =  num / den
         
-        # print(start_product_index, " --- ", p10)
+        # print(start_product_index, " --- ", num, " || ", den, " .. ", p10)
 
         if np.random.uniform(0, 1) < p10:
             return (1,0) if start_product_index < 5 else (1, 1)
@@ -134,12 +134,53 @@ class Environment:
             actual_alpha = np.concatenate(
                 (actual_alpha, np.random.dirichlet(new_weights[i])), axis=0)
         actual_alpha = actual_alpha.reshape(3, 6)
+        
+        users_per_category = np.round(actual_alpha * n_users[:, np.newaxis]).astype(int)
+
+        # print("##############################")
+        # print("##### USERS DIRICHLET ########")
+        # print("##############################")
+
+        # print(users_per_category)
+
+        # print("##############################")
+        # print("##############################")
+        # print("##############################")
+
+        # ############################################# #
+        # ############################################# #
+
+
+        # ############################################# #
+        # ############################################# #
+        # actual_alpha = np.array([])
+
+        # for i in range(len(new_weights)):
+        #     actual_alpha = np.concatenate(
+        #         (actual_alpha, np.random.multinomial(self.average_users_per_feature[i], new_weights[i]/sum(new_weights[i]))), axis=0)
+        
+        # actual_alpha = actual_alpha.astype(int)
+        # actual_alpha = actual_alpha.reshape(3, 6)
+        
+        # users_per_category = actual_alpha
+
+        # print("##############################")
+        # print("##### USERS MULTINOMIAL ######")
+        # print("##############################")
+        
+        # print(users_per_category)
+
+        # print("##############################")
+        # print("##############################")
+        # print("##############################")
+        
+        # ############################################# #
+        # ############################################# #
+
 
         logger.debug("Alpha ratios: " + str(actual_alpha))
 
         # Apply alpha ratios to all users
-        users_per_category = np.round(actual_alpha * n_users[:, np.newaxis]).astype(int)
-
         users_per_category_copy = users_per_category.copy()
 
         total_number_users = sum(users_per_category)

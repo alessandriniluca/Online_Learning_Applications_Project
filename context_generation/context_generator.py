@@ -5,7 +5,7 @@ from environment.environment_context import Environment
 from optimizer.estimator import Estimator
 from optimizer.optimizer_context import Optimizer
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import RBF, Matern, RationalQuadratic, ConstantKernel as C
+from sklearn.gaussian_process.kernels import RBF, Matern, RationalQuadratic, WhiteKernel, RationalQuadratic, ConstantKernel as C
 from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions, \
     LearnerType, translate_feature_group
 from probability_calculator.quantities_estimator_by_feature import QuantitiesEstimatorByFeatures
@@ -241,8 +241,15 @@ class ContextGenerator:
             context.update(pulled_arms[i*5:i*5+5], rewards, user_features)
         for i in range(self.n_learners):
             for r, f in zip(rewards[i], user_features):
-                self.add_reward(i, pulled_arms[i], f, r)
+                self.add_reward(i, pulled_arms[i+5*self.get_range(f)], f, r)
 
+    def get_range(self, feature):
+        index = 0
+        for f in self.splitted_features:
+            if feature in f:
+                return index
+            else:
+                index += 1
 
     def update_quantities(self, rewards):
         for user in rewards:
@@ -273,7 +280,8 @@ class ContextGenerator:
 
         alpha = .5
         # kernel = C(5) * RBF(50)
-        kernel = C(10, constant_value_bounds="fixed") * RationalQuadratic(length_scale=20, alpha=100, length_scale_bounds="fixed", alpha_bounds="fixed")
+        kernel = C(5, constant_value_bounds="fixed") * RBF(50, length_scale_bounds="fixed") 
+                # C(10, constant_value_bounds="fixed") * RationalQuadratic(length_scale=20, alpha=100, length_scale_bounds="fixed", alpha_bounds="fixed")
                 # * Matern(length_scale=40,length_scale_bounds="fixed", nu=2.5)
                 # * RBF(length_scale=50, length_scale_bounds="fixed")
                 

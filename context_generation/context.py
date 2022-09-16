@@ -45,7 +45,7 @@ class Context:
                 for user in self.rewards_per_feature:
                     if user[3] in self.features and user[1] == i:
                         bud = user[2] * self.get_users_in_context(self.features) / self.get_users_in_context([user[3]])
-                        if bud <= 100:
+                        if bud <= 100: #  and len(self.features) == len(user[4])
                             x.append(bud)
                             y.append(user[0])
 

@@ -1,3 +1,4 @@
+from tkinter.tix import Tree
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -55,10 +56,8 @@ print("=== THIS IS OPTIMAL ALLOCATION ===")
 print(best_allocation, best_expected_profit)
 
 # Start simulation estimating alpha functions
-
 TIME_HORIZON = 50
-N_EXPERIMENTS = 3
-N_CAMPAIGNS = 5
+N_EXPERIMENTS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
 budgets = np.linspace(0, sim_configuration["total_budget"], n_arms)
@@ -109,6 +108,7 @@ for e in range(0, N_EXPERIMENTS):
 
         optimizer.run_optimization()
         current_allocation, expected_profit = optimizer.find_best_allocation()
+        print("ALLOCATION:")
         print(current_allocation)
 
         # Random initialization
