@@ -1,9 +1,11 @@
 
+import imp
 import numpy as np
 from context_generation.context import Context
 from environment.environment_context import Environment
 from optimizer.estimator import Estimator
 from optimizer.optimizer_context import Optimizer
+from sklearn.linear_model import Lasso
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, Matern, RationalQuadratic, WhiteKernel, RationalQuadratic, ConstantKernel as C
 from common.utils import load_static_env_configuration, load_static_sim_configuration, get_test_alphas_functions, \
@@ -37,17 +39,25 @@ class ContextGenerator:
         context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (0,1), (1,0), (1,1)])
         self.active_contexts.append(context)
         self.splitted_features.append([(0,0), (0,1), (1,0), (1,1)])
+        self.t = 1
 
 
-    def add_reward(self, product_number, arm_idx, user_feature, reward):
+    def add_reward(self, product_number, arm_idx, user_feature, user_features, reward):
         feature1 = user_feature[0]
         feature2 = user_feature[1]
         float_arm = None
         for s in self.splitted_features:
             if (feature1, feature2) in s:
                 # print("-----", self.arms[arm_idx], self.get_users_in_context(s), self.get_users_in_context([user_feature]))
-                float_arm = self.arms[arm_idx]/self.get_users_in_context(s) * self.get_users_in_context([user_feature])
-        self.rewards_per_feature.append([reward, product_number, float_arm, user_feature])
+                float_arm = self.arms[arm_idx]/self.get_users_current_context(s, user_features) * self.get_users_current_context([user_feature], user_features)
+        self.rewards_per_feature.append([reward, product_number, float_arm, user_feature, s, self.t])
+
+    def get_users_current_context(self, feature_list, user_features):
+        tot = 0
+        for f in user_features:
+            if f in feature_list:
+                tot += 1
+        return tot
 
     def get_users_in_context(self, feature_list):
         tot = 0
@@ -55,9 +65,18 @@ class ContextGenerator:
             tot += self.average_users_per_feature[feature]
         return tot
 
+    def get_users_in_context(self, feature_list, t):
+        tot = 0
+        
+        for u in self.rewards_per_feature:
+            if u[3] in feature_list and u[5] == t:
+                tot += 1
+
+        return tot
         
     
-    def split(self):
+    def split(self, t):
+        self.t = t
         self.active_contexts = []
         self.splitted_features = []
 
@@ -82,15 +101,16 @@ class ContextGenerator:
         # a = self.optimize(second_feature_1, [(0,0), (1,0)]) 
         # b = self.optimize(second_feature_2, [(0,1), (1,1)])
         # print("22---a:", a, "--b:", b)
+
         reward_second_feature = self.optimize([second_feature_1, second_feature_2], [[(0,0), (1,0)], [(0,1), (1,1)]])
 
         print("------ reward no split", reward_no_split, "Reward first feature", reward_first_feature, "Reward second feature", reward_second_feature)
-        if reward_no_split > reward_first_feature and reward_no_split > reward_second_feature:
+        if reward_no_split > reward_first_feature and reward_no_split > reward_second_feature: # False
             context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (0,1), (1,0), (1,1)])
             self.active_contexts.append(context)
             self.splitted_features.append([(0,0), (0,1), (1,0), (1,1)])
 
-        elif reward_first_feature > reward_second_feature:
+        elif reward_first_feature > reward_second_feature: # True
             
             # provo ulteriore split su feature 2
             aggregate_1 = self.optimize([first_feature_1], [[(0,0), (0,1)]]) 
@@ -102,7 +122,7 @@ class ContextGenerator:
             print("------1st aggregate_1", aggregate_1, "splitted_reward", splitted_reward)
 
             
-            if aggregate_1 < splitted_reward:
+            if aggregate_1 < splitted_reward: # True
                 # split primo dei due gruppi
                 context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0)])
                 self.active_contexts.append(context)
@@ -123,7 +143,7 @@ class ContextGenerator:
 
             print("------1st aggregate_2", aggregate_2, "splitted_reward", splitted_reward)
 
-            if aggregate_2 < splitted_reward:
+            if aggregate_2 < splitted_reward: # False
                 context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0)])
                 self.active_contexts.append(context)
                 context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,1)])
@@ -229,19 +249,48 @@ class ContextGenerator:
             multiple_quantities=True
         )
         
+        tot_users = len(self.rewards_per_feature)
+        n_00_u = 0
+        n_01_u = 0
+        n_10_u = 0
+        n_11_u = 0
+        for u in self.rewards_per_feature:
+            if u[3] == (0,0):
+                n_00_u += 1
+            elif u[3] == (0,1):
+                n_01_u += 1
+            elif u[3] == (1,0):
+                n_10_u += 1
+            else:
+                n_11_u += 1
+
+        optimizer.users_number[0] = n_00_u / self.t / 5
+        optimizer.users_number[1] = n_01_u / self.t / 5
+        optimizer.users_number[2] = n_10_u / self.t / 5
+        optimizer.users_number[3] = n_11_u / self.t / 5
+
+        print(optimizer.users_number)
+
         # print(" ---- ", self.quantity_estimator.get_quantities_divided(features))
 
         optimizer.run_optimization()
         current_allocation, expected_profit = optimizer.find_best_allocation()
         return expected_profit #* total_users_in_context / (total_users_in_context + users_to_divide)
 
+    # def update(self, pulled_arms, rewards, user_features):
+    #     for i, context in enumerate(self.active_contexts):
+    #         context.update(pulled_arms[i*5:i*5+5], rewards, user_features)
+    #     for k in range(self.n_learners*len(self.active_contexts)):
+    #         i = k % 5
+    #         for r, f in zip(rewards[i], user_features):
+    #             self.add_reward(i, pulled_arms[k], f, r)
 
     def update(self, pulled_arms, rewards, user_features):
         for i, context in enumerate(self.active_contexts):
             context.update(pulled_arms[i*5:i*5+5], rewards, user_features)
         for i in range(self.n_learners):
             for r, f in zip(rewards[i], user_features):
-                self.add_reward(i, pulled_arms[i+5*self.get_range(f)], f, r)
+                self.add_reward(i, pulled_arms[i+5*self.get_range(f)], f, user_features, r)
 
     def get_range(self, feature):
         index = 0
@@ -278,7 +327,7 @@ class ContextGenerator:
             features (list): it is a list like [(0,0), (1,0)] of the feature you are interested in
         """
 
-        alpha = .5
+        alpha = .65
         # kernel = C(5) * RBF(50)
         kernel = C(5, constant_value_bounds="fixed") * RBF(50, length_scale_bounds="fixed") 
                 # C(10, constant_value_bounds="fixed") * RationalQuadratic(length_scale=20, alpha=100, length_scale_bounds="fixed", alpha_bounds="fixed")
@@ -303,7 +352,7 @@ class ContextGenerator:
 
             for user in self.rewards_per_feature:
                 if user[3] in features and user[1] == i:
-                    bud = user[2] * self.get_users_in_context(features) / self.get_users_in_context([user[3]])
+                    bud = user[2] * self.get_users_in_context(features, user[5]) / self.get_users_in_context([user[3]], user[5])
                     if bud <= 100:
                         x.append(bud)
                         y.append(user[0])
@@ -384,6 +433,7 @@ class ContextGenerator:
 
 
     def get_expected_rewards(self):
+        self.t += 1
         alphas_prime = np.zeros((self.n_arms, self.n_learners, len(self.splitted_features)))
         for idx, context in enumerate(self.active_contexts):
             alphas_prime[:, :, idx] = context.get_expected_rewards()[:, :, 0]

@@ -1,6 +1,6 @@
 import math
 
-from common.utils import get_logger, get_products
+from common.utils import get_logger, get_products, translate_feature_group
 from environment.product import Product
 from environment.user import User
 import numpy as np
@@ -73,6 +73,12 @@ class Environment:
         else:
             return (1, 1) if start_product_index < 5 else (1, 0)
 
+    def get_users_in_context_real(self, feature_list, n_users):
+        n_users = [n_users[0], n_users[1], n_users[2]/2, n_users[2]/2]
+        tot = 0
+        for f in feature_list:
+            tot += n_users[f]
+        return tot
 
     def round(self, budget, feature_division):
         """
@@ -98,8 +104,8 @@ class Environment:
                 if i in feature_list:
                     b = budget[idx*5 : idx*5+5]
                     for j in range((len(b))):
-                        users_in_context = self.get_users_in_context(feature_list)
-                        users_with_specific_features = self.average_users_per_feature[i]
+                        users_in_context = self.get_users_in_context_real(feature_list, n_users)
+                        users_with_specific_features = self.get_users_in_context_real([i], n_users)
                         budget_per_class[j] += b[j]/users_in_context*users_with_specific_features
 
             temp_budget.append(budget_per_class)
@@ -140,8 +146,8 @@ class Environment:
         # print("##############################")
         # print("##### USERS DIRICHLET ########")
         # print("##############################")
-
-        # print(users_per_category)
+        print("DIRICHLET:")
+        print(users_per_category)
 
         # print("##############################")
         # print("##############################")
@@ -153,22 +159,22 @@ class Environment:
 
         # ############################################# #
         # ############################################# #
-        # actual_alpha = np.array([])
+        actual_alpha = np.array([])
 
-        # for i in range(len(new_weights)):
-        #     actual_alpha = np.concatenate(
-        #         (actual_alpha, np.random.multinomial(self.average_users_per_feature[i], new_weights[i]/sum(new_weights[i]))), axis=0)
+        for i in range(len(new_weights)):
+            actual_alpha = np.concatenate(
+                (actual_alpha, np.random.multinomial(self.configuration.average_users_number[i], new_weights[i]/sum(new_weights[i]))), axis=0)
         
-        # actual_alpha = actual_alpha.astype(int)
-        # actual_alpha = actual_alpha.reshape(3, 6)
+        actual_alpha = actual_alpha.astype(int)
+        actual_alpha = actual_alpha.reshape(3, 6)
         
-        # users_per_category = actual_alpha
+        users_per_category = actual_alpha
 
         # print("##############################")
         # print("##### USERS MULTINOMIAL ######")
         # print("##############################")
-        
-        # print(users_per_category)
+        print("MULTINOMIAL:")
+        print(users_per_category)
 
         # print("##############################")
         # print("##############################")

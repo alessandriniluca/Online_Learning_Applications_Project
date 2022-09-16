@@ -57,7 +57,7 @@ print(best_allocation, best_expected_profit)
 
 # Start simulation estimating alpha functions
 TIME_HORIZON = 50
-N_EXPERIMENTS = 5
+N_EXPERIMENTS = 3
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
 budgets = np.linspace(0, sim_configuration["total_budget"], n_arms)
@@ -86,11 +86,11 @@ for e in range(0, N_EXPERIMENTS):
     for t in range(TIME_HORIZON):
 
         if t % 14 == 0 and t > 1:
-            context_generator.split()
+            context_generator.split(t+1)
         
         # Ask for estimations (get alpha primes)
         contexts, ts_alpha_prime = context_generator.get_expected_rewards()
-
+        
         # Run optimization
         optimizer = Optimizer(
             users_number=env.configuration.average_users_number,

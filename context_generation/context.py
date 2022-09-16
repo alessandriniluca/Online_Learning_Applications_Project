@@ -44,7 +44,7 @@ class Context:
 
                 for user in self.rewards_per_feature:
                     if user[3] in self.features and user[1] == i:
-                        bud = user[2] * self.get_users_in_context(self.features) / self.get_users_in_context([user[3]])
+                        bud = user[2] * self.get_users_in_context_t(features, user[5]) / self.get_users_in_context_t([user[3]], user[5])
                         if bud <= 100: #  and len(self.features) == len(user[4])
                             x.append(bud)
                             y.append(user[0])
@@ -110,6 +110,15 @@ class Context:
             tot += self.average_users_per_feature[feature]
         return tot
 
+    def get_users_in_context_t(self, feature_list, t):
+        tot = 0
+        
+        for u in self.rewards_per_feature:
+            if u[3] in feature_list and u[5] == t:
+                tot += 1
+
+        return tot
+        
     def translate_features(self, features):
         res = []
         for f in features:
