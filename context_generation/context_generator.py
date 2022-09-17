@@ -59,7 +59,7 @@ class ContextGenerator:
 
         
     
-    def split(self, force=[[False, True, False], [False, True, True, False], [False, False, False, False]]):
+    def split(self, force=[[False, False, False], [False, False, False, False], [False, False, False, False]]):
         self.active_contexts = []
         self.splitted_features = []
 
