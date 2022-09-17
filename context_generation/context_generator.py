@@ -1,4 +1,6 @@
 
+import math
+from tkinter import Menu
 import numpy as np
 from context_generation.context import Context
 from environment.environment_context import Environment
@@ -57,126 +59,145 @@ class ContextGenerator:
 
         
     
-    def split(self):
+    def split(self, force=[[False, False], [False, False, False, False], [False, False, False, False]]):
         self.active_contexts = []
         self.splitted_features = []
 
+        # try split first feature
+        
+        #try split second feature
+
+        best_reward_feat_1 = 0
+        best_reward_feat_2 = 0
+
+        feat_1_splitted_features = []
+        feat_1_active_ctx = []
+
+        feat_2_splitted_features = []
+        feat_2_active_ctx = []
+
+        first_feature_1 = self.get_alphas_by_feature([(0,0), (0,1)])
+        aggregate_1 = self.optimize([first_feature_1], [[(0,0), (0,1)]]) 
+
+        set1 = self.get_alphas_by_feature([(0,0)])
+        set2 = self.get_alphas_by_feature([(0,1)])
+        splitted_reward = self.optimize([set1, set2], [[(0,0)], [(0,1)]])
+
+        print("------1st aggregate_1", aggregate_1, "splitted_reward", splitted_reward)
+
+        if force[1][0] or aggregate_1 < splitted_reward and not force[1][1]:
+            # split primo dei due gruppi
+            context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0)])
+            feat_1_active_ctx.append(context)
+            context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1)])
+            feat_1_active_ctx.append(context)
+            feat_1_splitted_features.append([(0,0)])
+            feat_1_splitted_features.append([(0,1)])
+            best_reward_feat_1 += splitted_reward
+        else:
+            context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (0,1)])
+            feat_1_active_ctx.append(context)
+            feat_1_splitted_features.append([(0,0), (0,1)])
+            best_reward_feat_1 += aggregate_1
+
+
+        first_feature_2 = self.get_alphas_by_feature([(1,0), (1,1)])
+        aggregate_2 = self.optimize([first_feature_2], [[(1,0), (1,1)]])
+        
+        set1 = self.get_alphas_by_feature([(1,0)])
+        set2 = self.get_alphas_by_feature([(1,1)])
+        splitted_reward = self.optimize([set1, set2], [[(1,0)], [(1,1)]])
+
+        print("------1st aggregate_2", aggregate_2, "splitted_reward", splitted_reward)
+
+        if force[1][2] or aggregate_2 < splitted_reward and not force[1][3]:
+            context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0)])
+            feat_1_active_ctx.append(context)
+            context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,1)])
+            feat_1_active_ctx.append(context)
+            feat_1_splitted_features.append([(1,0)])
+            feat_1_splitted_features.append([(1,1)])
+            best_reward_feat_1 += splitted_reward
+        else:
+            context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0), (1,1)])
+            feat_1_active_ctx.append(context)
+            feat_1_splitted_features.append([(1,0), (1,1)])
+            best_reward_feat_1 += splitted_reward
+                   
+
+
+        # provo ulteriore split su feature 2
+        second_feature_1 = self.get_alphas_by_feature([(0,0), (1,0)])
+        aggregate_1 = self.optimize([second_feature_1], [[(0,0), (1,0)]])
+
+        set1 = self.get_alphas_by_feature([(0,0)])
+        set2 = self.get_alphas_by_feature([(1,0)])
+        splitted_reward = self.optimize([set1, set2], [[(0,0)], [(1,0)]])
+        print("------2nd aggregate_1", aggregate_1, "splitted_reward", splitted_reward)
+
+        if force[2][0] or aggregate_1 < splitted_reward and not force[2][1]:
+            # split primo dei due gruppi
+            context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0)])
+            feat_2_active_ctx.append(context)
+            context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0)])
+            feat_2_active_ctx.append(context)
+            feat_2_splitted_features.append([(0,0)])
+            feat_2_splitted_features.append([(1,0)])
+            best_reward_feat_2 += splitted_reward
+        else:
+            context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (1,0)])
+            feat_2_active_ctx.append(context)
+            feat_2_splitted_features.append([(0,0),(1,0)])
+            best_reward_feat_2 += aggregate_1
+
+        second_feature_2 = self.get_alphas_by_feature([(0,1), (1,1)])
+        aggregate_2 = self.optimize([second_feature_2], [[(0,1), (1,1)]])
+
+        set1 = self.get_alphas_by_feature([(0,1)])
+        set2 = self.get_alphas_by_feature([(1,1)])
+        splitted_reward = self.optimize([set1, set2], [[(0,1)], [(1,1)]])
+        print("------2nd aggregate_2", aggregate_2, "splitted_reward", splitted_reward)
+
+        if force[2][2] or aggregate_2 < splitted_reward and not force[2][3]:
+            # split primo dei due gruppi
+            context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1)])
+            feat_2_active_ctx.append(context)
+            context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,1)])
+            feat_2_active_ctx.append(context)
+            feat_2_splitted_features.append([(0,1)])
+            feat_2_splitted_features.append([(1,1)])
+            best_reward_feat_2 += splitted_reward
+        else:
+            context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1), (1,1)])
+            feat_2_active_ctx.append(context)
+            feat_2_splitted_features.append([(0,1), (1,1)])
+            best_reward_feat_2 += aggregate_2
+
+
         no_split_alphas = self.get_alphas_by_feature([(0,0), (0,1), (1,0), (1,1)])
-        print( "PPPPP", no_split_alphas.shape)
 
         reward_no_split = self.optimize([no_split_alphas], [[(0,0), (0,1), (1,0), (1,1)]])
 
-        # try split first feature
-        first_feature_1 = self.get_alphas_by_feature([(0,0), (0,1)])
-        first_feature_2 = self.get_alphas_by_feature([(1,0), (1,1)])
-        
-        # a = self.optimize(first_feature_1, [(0,0), (0,1)]) 
-        # b = self.optimize(first_feature_2, [(1,0), (1,1)])
-        # print("---a:", a, "--b:", b)
-        reward_first_feature = self.optimize([first_feature_1, first_feature_2], [[(0,0), (0,1)], [(1,0), (1,1)]])
+        print("#######################################")
+        print("########### CHOSEN SPLIT ##############")
+        print("#######################################")
 
+        print("Reward No Split: ", reward_no_split, "Best Rew 1: ", best_reward_feat_1, "Best Rew 2", best_reward_feat_2)
 
-        #try split second feature
-        second_feature_1 = self.get_alphas_by_feature([(0,0), (1,0)])
-        second_feature_2 = self.get_alphas_by_feature([(0,1), (1,1)])
-        # a = self.optimize(second_feature_1, [(0,0), (1,0)]) 
-        # b = self.optimize(second_feature_2, [(0,1), (1,1)])
-        # print("22---a:", a, "--b:", b)
-        reward_second_feature = self.optimize([second_feature_1, second_feature_2], [[(0,0), (1,0)], [(0,1), (1,1)]])
-
-        print("------ reward no split", reward_no_split, "Reward first feature", reward_first_feature, "Reward second feature", reward_second_feature)
-        if reward_no_split > reward_first_feature and reward_no_split > reward_second_feature:
+        if force[0][0] or reward_no_split > best_reward_feat_1 and reward_no_split > best_reward_feat_2 and not (force[0][1] or force[0][2]):
             context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (0,1), (1,0), (1,1)])
             self.active_contexts.append(context)
             self.splitted_features.append([(0,0), (0,1), (1,0), (1,1)])
-
-        elif reward_first_feature > reward_second_feature:
-            
-            # provo ulteriore split su feature 2
-            aggregate_1 = self.optimize([first_feature_1], [[(0,0), (0,1)]]) 
-
-            set1 = self.get_alphas_by_feature([(0,0)])
-            set2 = self.get_alphas_by_feature([(0,1)])
-            splitted_reward = self.optimize([set1, set2], [[(0,0)], [(0,1)]])
-
-            print("------1st aggregate_1", aggregate_1, "splitted_reward", splitted_reward)
-
-            
-            if aggregate_1 < splitted_reward:
-                # split primo dei due gruppi
-                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0)])
-                self.active_contexts.append(context)
-                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1)])
-                self.active_contexts.append(context)
-                self.splitted_features.append([(0,0)])
-                self.splitted_features.append([(0,1)])
-            else:
-                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (0,1)])
-                self.active_contexts.append(context)
-                self.splitted_features.append([(0,0), (0,1)])
-
-            aggregate_2 = self.optimize([first_feature_2], [[(1,0), (1,1)]])
-            
-            set1 = self.get_alphas_by_feature([(1,0)])
-            set2 = self.get_alphas_by_feature([(1,1)])
-            splitted_reward = self.optimize([set1, set2], [[(1,0)], [(1,1)]])
-
-            print("------1st aggregate_2", aggregate_2, "splitted_reward", splitted_reward)
-
-            if aggregate_2 < splitted_reward:
-                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0)])
-                self.active_contexts.append(context)
-                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,1)])
-                self.active_contexts.append(context)
-                self.splitted_features.append([(1,0)])
-                self.splitted_features.append([(1,1)])
-            else:
-                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0), (1,1)])
-                self.active_contexts.append(context)
-                self.splitted_features.append([(1,0), (1,1)])
-            
-
-        else:         
-            # provo ulteriore split su feature 2
-            aggregate_1 = self.optimize([second_feature_1], [[(0,0), (1,0)]])
-
-            set1 = self.get_alphas_by_feature([(0,0)])
-            set2 = self.get_alphas_by_feature([(1,0)])
-            splitted_reward = self.optimize([set1, set2], [[(0,0)], [(1,0)]])
-            print("------2nd aggregate_1", aggregate_1, "splitted_reward", splitted_reward)
-
-            if aggregate_1 < splitted_reward:
-                # split primo dei due gruppi
-                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0)])
-                self.active_contexts.append(context)
-                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0)])
-                self.active_contexts.append(context)
-                self.splitted_features.append([(0,0)])
-                self.splitted_features.append([(1,0)])
-            else:
-                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (1,0)])
-                self.active_contexts.append(context)
-                self.splitted_features.append([(0,0),(1,0)])
-
-            aggregate_2 = self.optimize([second_feature_2], [[(0,1), (1,1)]])
-
-            set1 = self.get_alphas_by_feature([(0,1)])
-            set2 = self.get_alphas_by_feature([(1,1)])
-            splitted_reward = self.optimize([set1, set2], [[(0,1)], [(1,1)]])
-            print("------2nd aggregate_2", aggregate_2, "splitted_reward", splitted_reward)
-
-            if aggregate_2 < splitted_reward:
-                # split primo dei due gruppi
-                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1)])
-                self.active_contexts.append(context)
-                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,1)])
-                self.active_contexts.append(context)
-                self.splitted_features.append([(0,1)])
-                self.splitted_features.append([(1,1)])
-            else:
-                context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1), (1,1)])
-                self.active_contexts.append(context)
-                self.splitted_features.append([(0,1), (1,1)])
+            print("AGG")
+        elif force[0][1] or best_reward_feat_1 > best_reward_feat_2 and not force[0][2]:
+            self.active_contexts = feat_1_active_ctx
+            self.splitted_features = feat_1_splitted_features
+            print("Feat 1")
+        else:
+            self.active_contexts = feat_2_active_ctx
+            self.splitted_features = feat_2_splitted_features
+            print("Feat 2")
+        print(self.splitted_features)
 
 
     def optimize(self, alphas, features):
@@ -269,7 +290,6 @@ class ContextGenerator:
         #     plot_mabs = True
 
         # print("------ FETAURES:", features)
-        total_users = 0
         gps = []
         alphas = np.zeros((self.n_arms, self.n_learners, 1))
         """
@@ -301,13 +321,33 @@ class ContextGenerator:
             x = []
             y = []
 
+            avg_per_arm = [0] * len(self.arms)
+            samples_per_arm = [0] * len(self.arms)
+            
+            # BUG: !!!!!!!!! HARD CODED !!!!!!!!!!!!!!!!
+            resolution = 5
+            res_half = resolution / 2
+
             for user in self.rewards_per_feature:
                 if user[3] in features and user[1] == i:
                     bud = user[2] * self.get_users_in_context(features) / self.get_users_in_context([user[3]])
                     if bud <= 100:
                         x.append(bud)
                         y.append(user[0])
-                        total_users += 1
+                        
+                        for ai, a in enumerate(self.arms):
+                            if bud >= (a - res_half) and bud < (a + res_half):
+                                avg_per_arm[ai] += user[0]
+                                samples_per_arm[ai] += 1
+                                continue
+
+            
+            for jj in range(len(avg_per_arm)):
+                if samples_per_arm[jj] != 0:
+                    avg_per_arm[jj] = avg_per_arm[jj] / samples_per_arm[jj]
+                else:
+                    avg_per_arm[jj] = 0
+
 
             x = np.atleast_2d(x).T
             y = np.array(y)
@@ -320,7 +360,7 @@ class ContextGenerator:
 
             mean, sigma = gp.predict(np.atleast_2d(self.arms).T, return_std=True)
 
-            massimo = max(x)
+            massimo = max(x) + res_half
             
             # print(x, mean, massimo, len(mean))
             
@@ -328,10 +368,23 @@ class ContextGenerator:
                 if a > massimo:
                     mean[j] = 0
 
+            # lb = sigma
+            lb = np.sqrt(- math.log(0.05) / ((2 * np.array(samples_per_arm, dtype='float64')) + 0.000001))
+            
+            # lower_bound = avg_per_arm - lb
             lower_bound = mean - sigma
-            lower_bound = np.clip(lower_bound, 0, 1)
+            lower_bound_clipped = np.clip(lower_bound, 0, 1)
 
-            alphas[:, i, 0] = np.array(lower_bound)
+            # print(".-..-.-.-.-.-.-.-..---..--.-")
+            # print(mean)
+            # print(samples_per_arm)
+            # print(lb)
+            # print(lower_bound)
+            # print(lower_bound_clipped)
+            # print(".-..-.-.-.-.-.-.-..---..--.-")
+            # lower_bound = mean - sigma
+
+            alphas[:, i, 0] = np.array(lower_bound_clipped)
 
         #     if plot_mabs:
         #         x_pred = np.atleast_2d(self.arms).T

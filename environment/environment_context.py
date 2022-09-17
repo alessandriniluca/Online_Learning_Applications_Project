@@ -1,4 +1,5 @@
 import math
+from re import U
 
 from common.utils import get_logger, get_products
 from environment.product import Product
@@ -51,27 +52,6 @@ class Environment:
         for i, feature in enumerate(feature_list):
             tot += self.average_users_per_feature[feature]
         return tot
-
-    def calculate_feature_last_class(self, four_split_budget, start_product_index):
-        num = 0
-        den = 0
-        if start_product_index < 5:
-            num = four_split_budget[2][start_product_index]
-            den = four_split_budget[2][start_product_index] + four_split_budget[3][start_product_index]
-        else:
-            num = sum(four_split_budget[2])
-            den = sum(four_split_budget[2]) + sum(four_split_budget[3])
-
-        p10 = 0.5
-        if den != 0:
-            p10 =  num / den
-        
-        # print(start_product_index, " --- ", num, " || ", den, " .. ", p10)
-
-        if np.random.uniform(0, 1) < p10:
-            return (1,0) if start_product_index < 5 else (1, 1)
-        else:
-            return (1, 1) if start_product_index < 5 else (1, 0)
 
 
     def round(self, budget, feature_division):
@@ -181,21 +161,36 @@ class Environment:
         logger.debug("Alpha ratios: " + str(actual_alpha))
 
         # Apply alpha ratios to all users
-        users_per_category_copy = users_per_category.copy()
 
         total_number_users = sum(users_per_category)
         logger.debug("Users per category " + str(users_per_category))
         logger.debug("Sum: " + str(sum(total_number_users)))
 
         # discard alpha_0, user that visit competitor's website
-        # users_per_category = (users_per_category[:, :5])
+        users_per_category_2 = deepcopy(users_per_category)
+        users_per_category_3 = np.array([users_per_category_2[0], users_per_category_2[1], (np.round(np.array(users_per_category_2[2]/2))).astype(int), np.round(np.array(users_per_category_2[2]/2)).astype(int)])
+        # print("users_per_category_3")
+        print(users_per_category_3)
+
+        users_per_category_copy = deepcopy(users_per_category_3)
+        
+        users_per_category = users_per_category_3[:, :5]
+
+        
+        # print("users_per_category")
+        print(users_per_category)
+
 
         # instantiate all users for this round
         this_round_users = []
-        gone_10 = 0
-        gone_11 = 0
+        # stay_10 = 0
+        # stay_11 = 0
         this_round_profit = 0
-        for class_index in range(len(users_per_category)):
+        for class_index_2 in range(len(users_per_category)):
+            if class_index_2 == 3:
+                class_index = 2
+            else:
+                class_index = class_index_2
             for start_product_index in range(len(users_per_category[class_index])):
                 for _ in range(users_per_category[class_index][start_product_index]):
 
@@ -208,19 +203,19 @@ class Environment:
                         user_class=class_index,
                         # Note that we will have an effective split on feature 0
                         # The split of feature 1 instead will be performed only after seeing feature 0 == 0
-                        features=(0, 0) if class_index == 0 else (
-                            (0, 1) if class_index == 1 else self.calculate_feature_last_class(four_split_budget, start_product_index)), #((1, 1) if np.random.uniform(0, 1) < 0.5 else (1, 0))),
+                        features=(0, 0) if class_index_2 == 0 else (
+                            (0, 1) if class_index_2 == 1 else ( (1,0) if class_index_2 == 2 else (1,1))), #((1, 1) if np.random.uniform(0, 1) < 0.5 else (1, 0))),
                         starting_product=start_product_index,
                         # Make a copy of the graph for each user, since exploration will change graph probabilities
                         graph_clicks=self.configuration.graph_clicks.copy()
                     )
 
-                    if start_product_index > 4:
-                        if user.features == (1,0):
-                            gone_10 +=1
-                        elif user.features == (1,1):
-                            gone_11 +=1
-                        continue
+                    # if start_product_index < 4:
+                    #     if user.features == (1,0):
+                    #         stay_10 +=1
+                    #     elif user.features == (1,1):
+                    #         stay_11 +=1
+                    #     continue
 
                     this_round_users.append(user)
 
@@ -274,5 +269,10 @@ class Environment:
         # if uno_zero == 0 and uno_uno == 0:
         #     uno_zero = 1
         #     uno_uno = 1
+        # gone_10 = sum(users_per_category_copy[2][])
+        # gone_10 = 0
+        # gone_11 = 0
+        # print("Gone 10: ", gone_10, " - Gone 11: ", gone_11)
+        # exit()
 
-        return this_round_users, users_per_category_copy[0][5], users_per_category_copy[1][5], int(gone_10), int(gone_11), this_round_profit
+        return this_round_users, users_per_category_copy[0][5], users_per_category_copy[1][5], int(users_per_category_copy[2][5]), int(users_per_category_copy[3][5]), this_round_profit
