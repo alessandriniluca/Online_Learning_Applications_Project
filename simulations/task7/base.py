@@ -88,6 +88,17 @@ for e in range(0, N_EXPERIMENTS):
         if t % 14 == 0 and t > 1:
             context_generator.split()
         
+        # if t == 6:
+        #     context_generator.split(force=[[False, True, False], [True, False, True, False], [False, False, False, False]])
+        # elif t == 12:
+        #     context_generator.split(force=[[False, True, False], [True, True, True, True], [False, False, False, False]])
+        # elif t == 18:
+        #     context_generator.split(force=[[False, True, False], [True, False, False, True], [False, False, False, False]])
+        # elif t == 24:
+        #     context_generator.split(force=[[False, False, True], [True, False, True, False], [False, False, False, False]])
+        # elif t == 30:
+        #     context_generator.split(force=[[False, False, True], [True, True, True, True], [True, True, True, True]])
+
         # Ask for estimations (get alpha primes)
         contexts, ts_alpha_prime = context_generator.get_expected_rewards()
 
@@ -112,11 +123,11 @@ for e in range(0, N_EXPERIMENTS):
         print(current_allocation)
 
         # Random initialization
-        if round == 0:
-            sum = sim_configuration["max_budget"] + 10
-            while sum > sim_configuration["max_budget"]:
+        if t == 0:
+            summ = sim_configuration["total_budget"] + 10
+            while summ > sim_configuration["total_budget"]:
                 current_allocation = list(np.random.randint(20, size=5)*sim_configuration["resolution"])
-                sum = sum(current_allocation)
+                summ = sum(current_allocation)
         
         # Compute Rewards from the environment
         round_users, feature0_escaped, feature1_escaped, feature2_escaped, feature3_escaped, round_profit = env.round(current_allocation, translate_feature_group(contexts))

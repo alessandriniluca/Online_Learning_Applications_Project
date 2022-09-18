@@ -57,7 +57,7 @@ class ContextGenerator:
 
         
     
-    def split(self):
+    def split(self, force=[[False, False, False], [False, False, False, False], [False, False, False, False]]):
         self.active_contexts = []
         self.splitted_features = []
 
@@ -85,12 +85,12 @@ class ContextGenerator:
         reward_second_feature = self.optimize([second_feature_1, second_feature_2], [[(0,0), (1,0)], [(0,1), (1,1)]])
 
         print("------ reward no split", reward_no_split, "Reward first feature", reward_first_feature, "Reward second feature", reward_second_feature)
-        if reward_no_split > reward_first_feature and reward_no_split > reward_second_feature:
+        if force[0][0] or reward_no_split > reward_first_feature and reward_no_split > reward_second_feature and not force[0][1] and not force[0][2]:
             context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0), (0,1), (1,0), (1,1)])
             self.active_contexts.append(context)
             self.splitted_features.append([(0,0), (0,1), (1,0), (1,1)])
 
-        elif reward_first_feature > reward_second_feature:
+        elif force[0][1] or reward_first_feature > reward_second_feature and not force[0][2]:
             
             # provo ulteriore split su feature 2
             aggregate_1 = self.optimize([first_feature_1], [[(0,0), (0,1)]]) 
@@ -102,7 +102,7 @@ class ContextGenerator:
             print("------1st aggregate_1", aggregate_1, "splitted_reward", splitted_reward)
 
             
-            if aggregate_1 < splitted_reward:
+            if force[1][0] or aggregate_1 < splitted_reward and not force[1][1]:
                 # split primo dei due gruppi
                 context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0)])
                 self.active_contexts.append(context)
@@ -123,7 +123,7 @@ class ContextGenerator:
 
             print("------1st aggregate_2", aggregate_2, "splitted_reward", splitted_reward)
 
-            if aggregate_2 < splitted_reward:
+            if force[1][2] or aggregate_2 < splitted_reward and not force[1][3]:
                 context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,0)])
                 self.active_contexts.append(context)
                 context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(1,1)])
@@ -145,7 +145,7 @@ class ContextGenerator:
             splitted_reward = self.optimize([set1, set2], [[(0,0)], [(1,0)]])
             print("------2nd aggregate_1", aggregate_1, "splitted_reward", splitted_reward)
 
-            if aggregate_1 < splitted_reward:
+            if force[2][0] or aggregate_1 < splitted_reward and not force[2][1]:
                 # split primo dei due gruppi
                 context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,0)])
                 self.active_contexts.append(context)
@@ -165,7 +165,7 @@ class ContextGenerator:
             splitted_reward = self.optimize([set1, set2], [[(0,1)], [(1,1)]])
             print("------2nd aggregate_2", aggregate_2, "splitted_reward", splitted_reward)
 
-            if aggregate_2 < splitted_reward:
+            if force[2][2] or aggregate_2 < splitted_reward and not force[2][3]:
                 # split primo dei due gruppi
                 context = Context(self.average_users_per_feature, self.quantity_estimator, self.rewards_per_feature, self.n_arms, self.arms, self.learner_type, n_learners=5, features=[(0,1)])
                 self.active_contexts.append(context)
