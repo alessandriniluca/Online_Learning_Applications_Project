@@ -1,3 +1,4 @@
+from tkinter.tix import Tree
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -55,10 +56,8 @@ print("=== THIS IS OPTIMAL ALLOCATION ===")
 print(best_allocation, best_expected_profit)
 
 # Start simulation estimating alpha functions
-
 TIME_HORIZON = 50
 N_EXPERIMENTS = 5
-N_CAMPAIGNS = 5
 
 n_arms = int(sim_configuration["total_budget"] / sim_configuration["resolution"]) + 1
 budgets = np.linspace(0, sim_configuration["total_budget"], n_arms)
@@ -74,7 +73,7 @@ for e in range(0, N_EXPERIMENTS):
     #      gli esperimenti
     #gpucb_learners = MultiLearner(n_arms, budgets, LearnerType.UCB1, n_learners=N_CAMPAIGNS)
     # print("EEEEEEE", budgets)
-    context_generator = ContextGenerator(n_arms, budgets, LearnerType.UCB1)
+    context_generator = ContextGenerator(n_arms, budgets, LearnerType.UCB1, env_configuration.average_users_number)
     context_generator.start() # crea un unico context con un unico bandit
     env = Environment(
         configuration=env_configuration,
@@ -89,6 +88,17 @@ for e in range(0, N_EXPERIMENTS):
         if t % 14 == 0 and t > 1:
             context_generator.split()
         
+        # if t == 6:
+        #     context_generator.split(force=[[False, True, False], [True, False, True, False], [False, False, False, False]])
+        # elif t == 12:
+        #     context_generator.split(force=[[False, True, False], [True, True, True, True], [False, False, False, False]])
+        # elif t == 18:
+        #     context_generator.split(force=[[False, True, False], [True, False, False, True], [False, False, False, False]])
+        # elif t == 24:
+        #     context_generator.split(force=[[False, False, True], [True, False, True, False], [False, False, False, False]])
+        # elif t == 30:
+        #     context_generator.split(force=[[False, False, True], [True, True, True, True], [True, True, True, True]])
+
         # Ask for estimations (get alpha primes)
         contexts, ts_alpha_prime = context_generator.get_expected_rewards()
 
@@ -109,15 +119,16 @@ for e in range(0, N_EXPERIMENTS):
 
         optimizer.run_optimization()
         current_allocation, expected_profit = optimizer.find_best_allocation()
+        print("ALLOCATION:")
         print(current_allocation)
 
-
-        if round == 0:
-            sum = sim_configuration["max_budget"] + 10
-            while sum > sim_configuration["max_budget"]:
+        # Random initialization
+        if t == 0:
+            summ = sim_configuration["total_budget"] + 10
+            while summ > sim_configuration["total_budget"]:
                 current_allocation = list(np.random.randint(20, size=5)*sim_configuration["resolution"])
-                sum = sum(current_allocation)
-
+                summ = sum(current_allocation)
+        
         # Compute Rewards from the environment
         round_users, feature0_escaped, feature1_escaped, feature2_escaped, feature3_escaped, round_profit = env.round(current_allocation, translate_feature_group(contexts))
 

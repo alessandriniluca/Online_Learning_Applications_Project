@@ -78,7 +78,7 @@ class FullOptimizer(Optimizer):
                          products,
                          mean_quantities,
                          buy_probs,
-                         one_campaign_per_product)
+                         one_campaign_per_product=one_campaign_per_product)
 
         self.basic_alphas = basic_alphas
         self.alphas_functions = alphas_functions

@@ -87,7 +87,7 @@ class GPTS_Learner(Learner):
         Return expected rewards that will be provided to an optimizer to complete the combinatorial Bandit
         """
         sampled_values = np.random.normal(self.means, self.sigmas)
-        print("Learner ", self.name, "sampled values:", sampled_values)
+        # print("Learner ", self.name, "sampled values:", sampled_values)
         for i in range(len(sampled_values)):
             sampled_values[i] = min(max(sampled_values[i], 0.0), 1.0)
         return sampled_values

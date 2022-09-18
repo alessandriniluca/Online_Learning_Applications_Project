@@ -6,6 +6,8 @@ from environment.user import User
 import numpy as np
 import random
 
+from copy import deepcopy
+
 logger = get_logger(__name__)
 
 
@@ -40,6 +42,7 @@ class Environment:
             self.configuration.average_users_number[2]/2,
             self.configuration.average_users_number[2]/2
         ]
+
 
         logger.info("Environment initialized")
 
@@ -78,7 +81,8 @@ class Environment:
                         budget_per_class[j] += b[j]/users_in_context*users_with_specific_features
 
             temp_budget.append(budget_per_class)
-
+        
+        four_split_budget = deepcopy(temp_budget)
         # Trick per unire i budget destinati a features 10 e 11 che appartengono alla stessa classe
         for j in range(len(self.products)):
             temp_budget[2][j] += temp_budget[3][j]
@@ -108,28 +112,84 @@ class Environment:
             actual_alpha = np.concatenate(
                 (actual_alpha, np.random.dirichlet(new_weights[i])), axis=0)
         actual_alpha = actual_alpha.reshape(3, 6)
+        
+        users_per_category = np.round(actual_alpha * n_users[:, np.newaxis]).astype(int)
+
+        # print("##############################")
+        # print("##### USERS DIRICHLET ########")
+        # print("##############################")
+
+        # print(users_per_category)
+
+        # print("##############################")
+        # print("##############################")
+        # print("##############################")
+
+        # ############################################# #
+        # ############################################# #
+
+
+        # ############################################# #
+        # ############################################# #
+        # actual_alpha = np.array([])
+
+        # for i in range(len(new_weights)):
+        #     actual_alpha = np.concatenate(
+        #         (actual_alpha, np.random.multinomial(self.average_users_per_feature[i], new_weights[i]/sum(new_weights[i]))), axis=0)
+        
+        # actual_alpha = actual_alpha.astype(int)
+        # actual_alpha = actual_alpha.reshape(3, 6)
+        
+        # users_per_category = actual_alpha
+
+        # print("##############################")
+        # print("##### USERS MULTINOMIAL ######")
+        # print("##############################")
+        
+        # print(users_per_category)
+
+        # print("##############################")
+        # print("##############################")
+        # print("##############################")
+        
+        # ############################################# #
+        # ############################################# #
+
 
         logger.debug("Alpha ratios: " + str(actual_alpha))
 
         # Apply alpha ratios to all users
-        users_per_category = (actual_alpha * n_users[:, np.newaxis]).astype(int)
-
-        users_per_category_copy = users_per_category.copy()
 
         total_number_users = sum(users_per_category)
         logger.debug("Users per category " + str(users_per_category))
         logger.debug("Sum: " + str(sum(total_number_users)))
 
+        print(users_per_category)
+
         # discard alpha_0, user that visit competitor's website
-        users_per_category = (users_per_category[:, :5])
+        users_per_category = np.array([
+            users_per_category[0],
+            users_per_category[1],
+            np.round(users_per_category[2]/2),
+            np.round(users_per_category[2]/2)
+        ]).astype(int)
+
+        print(users_per_category)
+
+        
+        users_per_category_copy = deepcopy(users_per_category)
+        users_per_category = users_per_category[:, :5]
 
         # instantiate all users for this round
         this_round_users = []
         this_round_profit = 0
-        for class_index in range(len(users_per_category)):
+        for class_index_2 in range(len(users_per_category)):
             for start_product_index in range(len(users_per_category[class_index])):
                 for _ in range(users_per_category[class_index][start_product_index]):
-
+                    if class_index_2 == 3:
+                        class_index = 2
+                    else:
+                        class_index = class_index_2
                     # instantiate user of class (class_index) that starts from product (primary_product_index)
                     user = User(
                         self.configuration.reservation_price_means[class_index],
@@ -139,8 +199,8 @@ class Environment:
                         user_class=class_index,
                         # Note that we will have an effective split on feature 0
                         # The split of feature 1 instead will be performed only after seeing feature 0 == 0
-                        features=(0, 0) if class_index == 0 else (
-                            (0, 1) if class_index == 1 else ((1, 1) if np.random.uniform(0, 1) < 0.5 else (1, 0))),
+                        features=(0, 0) if class_index_2 == 0 else (
+                            (0, 1) if class_index_2 == 1 else ( (1,0) if class_index_2 == 2 else (1,1))), #((1, 1) if np.random.uniform(0, 1) < 0.5 else (1, 0))),
                         starting_product=start_product_index,
                         # Make a copy of the graph for each user, since exploration will change graph probabilities
                         graph_clicks=self.configuration.graph_clicks.copy()
@@ -199,4 +259,5 @@ class Environment:
         #     uno_zero = 1
         #     uno_uno = 1
 
-        return this_round_users, users_per_category_copy[0][5], users_per_category_copy[1][5], int(users_per_category_copy[2][5]/2), int(users_per_category_copy[2][5]/2), this_round_profit
+
+        return this_round_users, users_per_category_copy[0][5], users_per_category_copy[1][5], users_per_category_copy[2][5], users_per_category_copy[3][5], this_round_profit
