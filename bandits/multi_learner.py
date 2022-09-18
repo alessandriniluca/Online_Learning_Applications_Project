@@ -1,3 +1,4 @@
+from bandits.GPUCB_change_detection_discard_all import GPUCBChangeDetectionDiscardAll
 from bandits.GPUCB_sliding_window import GPUCBSlidingWindow
 from bandits.GPUCB_change_detection import GPUCBChangeDetection
 from bandits.gpucb1 import GPUCB1_Learner
@@ -23,9 +24,11 @@ class MultiLearner:
             elif learner_type == LearnerType.UCB1:
                 self.learners.append(GPUCB1_Learner(n_arms, arms, "learner_" + str(i)))
             elif learner_type == LearnerType.UCB_CHANGE_DETECTION:
-                self.learners.append(GPUCBChangeDetection(n_arms, arms, 8, 0.005, .04, "learner_" + str(i)))
+                self.learners.append(GPUCBChangeDetection(n_arms, arms, 3, 0.03, .075, "learner_" + str(i)))
             elif learner_type == LearnerType.UCB_SLIDING_WINDOW:
-                self.learners.append(GPUCBSlidingWindow(n_arms, arms, 10, "learner_" + str(i)))
+                self.learners.append(GPUCBSlidingWindow(n_arms, arms, 9, "learner_" + str(i)))
+            elif learner_type == LearnerType.UCB_CHANGE_DETECTION_DISCARD_ALL:
+                self.learners.append(GPUCBChangeDetectionDiscardAll(n_arms, arms, 3, 0.03, .075, "learner_" + str(i)))
 
 
     def get_expected_rewards(self):

@@ -3,12 +3,16 @@ from change_detection.change_detection import ChangeDetection
 import numpy as np
 
 
-class GPUCBChangeDetection(GPUCB1_Learner):
+class GPUCBChangeDetectionDiscardAll(GPUCB1_Learner):
 
   def __init__(self, n_arms, arms, M, eps, h, name=""):
     super().__init__(n_arms, arms, name)
     self.change_detection = ChangeDetection(n_arms, M, eps, h)
     self.valid_rewards = [[] for arm in range(n_arms)]
+    self.M = M
+    self.h = h
+    self.n_arms = n_arms
+    self.eps = eps
 
   def update_observations(self, arm_idx, reward):
     self.this_round_rewards.append(reward)
@@ -20,6 +24,8 @@ class GPUCBChangeDetection(GPUCB1_Learner):
     """
 
     if self.change_detection.update(self.this_round_arm_idx, np.average(self.this_round_rewards)):
+        self.change_detection = ChangeDetection(self.n_arms, self.M, self.eps, self.h)
+        self.valid_rewards = [[] for arm in range(self.n_arms)]
         self.valid_rewards[self.this_round_arm_idx] = self.this_round_rewards
     else:
         self.valid_rewards[self.this_round_arm_idx] += self.this_round_rewards

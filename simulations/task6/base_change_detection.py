@@ -36,10 +36,10 @@ estimator = Estimator(env.configuration.graph_clicks,
 buy_probs = estimator.get_buy_probs()
 
 
-TIME_HORIZON = 65
+TIME_HORIZON = 105
 N_EXPERIMENTS = 10
 N_CAMPAIGNS = 5
-CHANGE_FUNCTION_PERIOD = 30
+CHANGE_FUNCTION_PERIOD = 35
 
 
 
@@ -74,7 +74,9 @@ for e in range(0, N_EXPERIMENTS):
 
     for t in range(TIME_HORIZON):
 
-        if t == 0 or t == 20 or t == 50:
+        if t % CHANGE_FUNCTION_PERIOD == 0:
+            
+            # gpts_learners = MultiLearner(n_arms, budgets, LearnerType.UCB_CHANGE_DETECTION, n_learners=N_CAMPAIGNS)
 
             env.alphas_functions = function_generator.get_functions(season)
             season += 1
@@ -124,6 +126,13 @@ for e in range(0, N_EXPERIMENTS):
         optimizer.run_optimization()
         current_allocation, expected_profit = optimizer.find_best_allocation()
         print(current_allocation)
+
+
+        if round == 0:
+            sum = sim_configuration["max_budget"] + 10
+            while sum > sim_configuration["max_budget"]:
+                current_allocation = list(np.random.randint(20, size=5)*sim_configuration["resolution"])
+                sum = sum(current_allocation)
 
         # Compute Rewards from the environment
         round_users, total_users, round_profit = env.round(current_allocation)

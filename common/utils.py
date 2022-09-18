@@ -161,6 +161,7 @@ class LearnerType(enum.Enum):
     UCB1 = enum.auto()
     UCB_CHANGE_DETECTION = enum.auto()
     UCB_SLIDING_WINDOW = enum.auto()
+    UCB_CHANGE_DETECTION_DISCARD_ALL = enum.auto()
 
 def save_data(task_name, values):
     # ts stores the time in seconds

@@ -117,7 +117,7 @@ for experiment in range(N_EXPERIMENTS):
         best_allocation, expected_earning = optimizer.find_best_allocation()
         # end of optimization
         # perform the round and get the history of the users
-        users_history, round_profit = env.round(best_allocation)
+        users_history, round_profit, _, _ = env.round(best_allocation)
         # Update graph probabilities according to users history
         graph_estimator.update_graph_probabilities(users_history)
         estimator.update_graph_clicks(graph_estimator.get_estimated_graph())

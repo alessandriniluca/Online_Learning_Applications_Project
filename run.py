@@ -41,10 +41,23 @@ elif task == 4:
     else:
         print("It could only be: \"UCB\" or \"TS\"")
 elif task == 5:
-    import simulations.task5.base
+    if len(sys.argv) <= 2:
+        print("This task need to specify if ALL or UCB or TS")
+        print(" ")
+        print("Example for task 5 UCB use: python3 run.py 5 UCB")
+        print(" ")
+    type = sys.argv[2]
+    if type == "ALL":
+        import simulations.task5.base
+    elif type == "UCB":
+        import simulations.task5.base_ucb
+    elif type == "TS":
+        import simulations.task5.base_ts
+    else:
+        print("Error name - errore!!!")
 elif task == 6:
     if len(sys.argv) <= 2:
-        print("This task need to specify if change_detection or sliding_window")
+        print("This task need to specify if change_detection or change_detection_discard_all or sliding_window")
         print(" ")
         print("Example for task 6 with Change Detection use: python3 run.py 6 change_detection")
         print(" ")
@@ -53,8 +66,10 @@ elif task == 6:
         import simulations.task6.base_change_detection
     elif type == "sliding_window":
         import simulations.task6.base_sliding_window
+    elif type == "change_detection_discard_all":
+        import simulations.task6.base_change_detection_discard_all
     else:
-        print("It could only be: \"change_detection\" or \"sliding_window\"")
+        print("It could only be: \"change_detection\" or \"change_detection_discard_all\" or \"sliding_window\"")
 elif task == 7:
     import simulations.task7.base
 else:
