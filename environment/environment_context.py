@@ -74,6 +74,31 @@ class Environment:
             return (1, 1) if start_product_index < 5 else (1, 0)
 
 
+    def calculate_feature_last_class_2(self, tot_users_class_3, users_terza_classe_10, users_per_category, four_split_budget, start_product_index):     
+        num = 0
+        den = 0
+        # print("----", start_product_index)
+        if start_product_index < 5:
+            num = four_split_budget[2][start_product_index]
+            den = four_split_budget[2][start_product_index] + four_split_budget[3][start_product_index]
+            if den != 0:
+                prob = num/den
+            else:
+                prob = 0
+
+            if self.users_third_class_10[start_product_index] < users_per_category*prob:
+                self.users_third_class_10[start_product_index] += 1
+                return (1,0)
+            else:
+                return (1,1)
+        else:
+            k = (tot_users_class_3/2)
+            if k - sum(self.users_third_class_10) > 0:
+                self.users_third_class_10[5] += 1
+                return (1,0)
+            else:
+                return (1,1)
+
     def round(self, budget, feature_division):
         """
         Simulate a round given a budget allocation
@@ -195,6 +220,10 @@ class Environment:
         gone_10 = 0
         gone_11 = 0
         this_round_profit = 0
+
+
+
+        self.users_third_class_10 = [0, 0, 0, 0, 0, 0]
         for class_index in range(len(users_per_category)):
             for start_product_index in range(len(users_per_category[class_index])):
                 for _ in range(users_per_category[class_index][start_product_index]):
@@ -209,12 +238,11 @@ class Environment:
                         # Note that we will have an effective split on feature 0
                         # The split of feature 1 instead will be performed only after seeing feature 0 == 0
                         features=(0, 0) if class_index == 0 else (
-                            (0, 1) if class_index == 1 else self.calculate_feature_last_class(four_split_budget, start_product_index)), #((1, 1) if np.random.uniform(0, 1) < 0.5 else (1, 0))),
+                            (0, 1) if class_index == 1 else self.calculate_feature_last_class_2(n_users[2], self.users_third_class_10, users_per_category[class_index][start_product_index], four_split_budget, start_product_index)), #((1, 1) if np.random.uniform(0, 1) < 0.5 else (1, 0))),
                         starting_product=start_product_index,
                         # Make a copy of the graph for each user, since exploration will change graph probabilities
                         graph_clicks=self.configuration.graph_clicks.copy()
                     )
-
                     if start_product_index > 4:
                         if user.features == (1,0):
                             gone_10 +=1
@@ -274,5 +302,8 @@ class Environment:
         # if uno_zero == 0 and uno_uno == 0:
         #     uno_zero = 1
         #     uno_uno = 1
+
+        # print("-----", int(gone_10), int(gone_11), inn, users_per_category_copy[2][5])
+        # exit()
 
         return this_round_users, users_per_category_copy[0][5], users_per_category_copy[1][5], int(gone_10), int(gone_11), this_round_profit
