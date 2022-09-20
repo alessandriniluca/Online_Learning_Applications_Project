@@ -1,4 +1,3 @@
-from tkinter.tix import Tree
 import numpy as np
 from matplotlib import pyplot as plt
 
