@@ -1,7 +1,7 @@
 from ast import If
 from unittest import result
 import numpy as np
-from matplotlib import pyplot as plt
+from matplotlib import figure, pyplot as plt
 import sys
 import json
 
@@ -30,6 +30,23 @@ mean_regret = np.array(result_data['regret_means'])
 best_expected_profit = mean_profit + mean_regret #result_data['best_expected_profit']
 TIME_HORIZON = result_data['rounds']
 
+regrets = np.array(result_data['regrets'])
+regret_std_dev = np.std(regrets, axis=0)
+
+cumulative_regret_all = []
+for reg in regrets:
+    sum_regret = 0
+    cumulative_regret_single = []
+    for r in reg:
+        sum_regret += r
+        cumulative_regret_single.append(sum_regret)
+    cumulative_regret_all.append(cumulative_regret_single)
+
+cumulative_regret_all = np.array(cumulative_regret_all)
+
+cumulative_regret_mean = np.mean(cumulative_regret_all, axis=0)
+cumulative_regret_std = np.std(cumulative_regret_all, axis=0)
+
 
 # #################################### #
 # ########## REGRET PLOT ############# #
@@ -39,14 +56,22 @@ plt.ylabel("Regret")
 plt.xlabel("t")
 plt.plot(mean_regret, 'r')
 
-plt.ylim(bottom=-1000)
+x = np.linspace(0, TIME_HORIZON-1, TIME_HORIZON)
+
+plt.fill_between(x, mean_regret - regret_std_dev, mean_regret + regret_std_dev, color='r', alpha=0.2)
+
+
+plt.ylim(bottom=-2000)
 
 plt.axhline(y=0, color='k')
 
-plt.legend(["REGRET"])
+plt.legend(["REGRET", "REGRET STD DEV"])
 
 plt.title(title + "\nREGRET PLOT")
 
+
+#fig = plt.gcf()
+#fig.set_size_inches(13.5, 5.5)
 plt.savefig(json_filename + "_REGRET__.png", dpi=300)
 
 # #################################### #
@@ -79,6 +104,8 @@ else:
 
 plt.title(title + "\nREWARD PLOT and CLAIRVOYANT PLOT")
 
+#fig = plt.gcf()
+#fig.set_size_inches(13.5, 5.5)
 plt.savefig(json_filename + "_PROFIT__.png", dpi=300)
 
 
@@ -86,6 +113,31 @@ plt.savefig(json_filename + "_PROFIT__.png", dpi=300)
 # #################################### #
 # #################################### #
 
+plt.figure(2)
+plt.ylabel("Cumulative Regret")
+plt.xlabel("t")
+plt.plot(cumulative_regret_mean, 'r')
+
+x = np.linspace(0, TIME_HORIZON-1, TIME_HORIZON)
+plt.fill_between(x, cumulative_regret_mean - cumulative_regret_std, cumulative_regret_mean + cumulative_regret_std, color='r', alpha=0.2)
+
+plt.legend(["CUMULATIVE REGRET", "CUMULATIVE REGRET STD DEV"])
+
+plt.title(title + "\nCUMULATIVE REGRET PLOT")
+
+#fig = plt.gcf()
+#fig.set_size_inches(13.5, 5.5)
+plt.savefig(json_filename + "_CUMULATIVE_REGRET__.png", dpi=300)
+
+# #################################### #
+# ######## CUMULATIVE REGRET ######### #
+# #################################### #
+
+
+
+# #################################### #
+# #################################### #
+# #################################### #
 
 
 plt.show()
