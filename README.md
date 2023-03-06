@@ -2,7 +2,7 @@
 Folder of the project of Online Learning Applications (OLA) at Polimi
 
 ## Complete report
-Please refer to the file OnlineLearningApplications_Report.pdf
+Please refer to the file `OnlineLearningApplications_Report.pdf`
 
 ## Installation Instruction
 Clone this repo
